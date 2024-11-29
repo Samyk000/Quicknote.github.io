@@ -67,9 +67,9 @@ h1 {
 
 /* Search Bar Styling */
 #search-bar {
-    margin: 10px 122px;
+    margin: 10px auto; /* Center the search bar */
     display: flex;
-    justify-content: flex-start;
+    justify-content: center; /* Center content */
     width: 100%;
     max-width: 250px;
 }
@@ -150,7 +150,6 @@ h1 {
 
 .flash-note-header {
     display: flex;
-    max-width: calc(120% - 50%);
     justify-content: space-between;
     align-items: center;
 }
@@ -202,7 +201,6 @@ h1 {
 }
 
 /* Dark Mode */
-
 .dark-mode .edit-btn, .delete-btn {
     background: none;
     border: none;
@@ -221,6 +219,7 @@ h1 {
     transform: scale(1.1);
     color: #502b87;
 }
+
 .dark-mode {
     background: linear-gradient(135deg, #2c3e50, #34495e);
     color: #ecf0f1;
@@ -270,7 +269,6 @@ h1 {
 #toggle-dark-mode .icon {
     font-size: 1.5em;
 }
-
 
 /* Responsive Design */
 @media (max-width: 768px) {
