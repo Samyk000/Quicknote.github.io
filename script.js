@@ -4,16 +4,14 @@ const iconSpan = toggleDarkMode.querySelector(".icon");
 
 // Add an event listener for toggling dark mode
 toggleDarkMode.addEventListener("click", () => {
-  // Toggle the dark mode class on the body
   document.body.classList.toggle("dark-mode");
 
-  // Change the icon and button text based on the current mode
   if (document.body.classList.contains("dark-mode")) {
-    iconSpan.textContent = "🌙"; // Set to moon icon
-    toggleDarkMode.innerHTML = `<span class="icon">🌙</span> Light Mode`;
+    iconSpan.textContent = "";
+    toggleDarkMode.innerHTML = `<span class="icon">🔆</span> `;
   } else {
-    iconSpan.textContent = "☀️"; // Set to sun icon
-    toggleDarkMode.innerHTML = `<span class="icon">☀️</span> Dark Mode`;
+    iconSpan.textContent = "";
+    toggleDarkMode.innerHTML = `<span class="icon">🌘</span> `;
   }
 });
 
@@ -30,37 +28,37 @@ function displayFlashNotes(notes) {
   notesContainer.innerHTML = ''; // Clear previous content
 
   notes.forEach(note => {
-    const noteElement = document.createElement('div');
-    noteElement.classList.add('flash-note');
-    noteElement.id = note.id;
+      const noteElement = document.createElement('div');
+      noteElement.classList.add('flash-note');
+      noteElement.id = note.id;
 
-    if (note.isEditing) {
-      // Display in edit mode
-      noteElement.innerHTML = `
-        <div class="flash-note-header">
-          <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" />
-          <div class="icon-container">
-            <button onclick="saveEdit('${note.id}')" class="edit-btn">👌</button>
-            <button onclick="cancelEdit('${note.id}')" class="edit-btn">❌</button>
-          </div>
-        </div>
-        <textarea class="note-content-input" oninput="updateNoteContent('${note.id}', this.value)">${note.content}</textarea>
-      `;
-    } else {
-      // Display in normal mode
-      noteElement.innerHTML = `
-        <div class="flash-note-header">
-          <h2>${note.title}</h2>
-          <div class="icon-container">
-            <button onclick="editNote('${note.id}')" class="edit-btn">✏️</button>
-            <button onclick="deleteNote('${note.id}')" class="delete-btn">🗑️</button>
-          </div>
-        </div>
-        <p>${note.content}</p>
-      `;
-    }
+      if (note.isEditing) {
+          // Display in edit mode
+          noteElement.innerHTML = `
+              <div class="flash-note-header">
+                <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" />
+                <div class="icon-container">
+                  <button onclick="saveEdit('${note.id}')" class="edit-btn"><i class="fas fa-save"></i></button>
+                  <button onclick="cancelEdit('${note.id}')" class="edit-btn"><i class="fas fa-times"></i></button>
+                </div>
+              </div>
+              <textarea class="note-content-input" oninput="updateNoteContent('${note.id}', this.value)" placeholder="Content">${note.content}</textarea>
+          `;
+      } else {
+          // Display in normal mode
+          noteElement.innerHTML = `
+              <div class="flash-note-header">
+                <h2>${note.title}</h2>
+                <div class="icon-container">
+                  <button onclick="editNote('${note.id}')" class="edit-btn"><i class="fas fa-edit"></i></button>
+                  <button onclick="deleteNoteWithEffect('${note.id}')" class="delete-btn"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+              <p>${note.content}</p>
+          `;
+      }
 
-    notesContainer.appendChild(noteElement);
+      notesContainer.appendChild(noteElement);
   });
 }
 
@@ -136,14 +134,27 @@ function deleteNote(noteId) {
   displayFlashNotes(flashNotes);
 }
 
-function saveNote() {
-  const title = document.getElementById('noteTitle').value;
-  const content = document.getElementById('noteContent').value;
+// Delete with shake effect
+function deleteNoteWithEffect(noteId) {
+  const noteElement = document.getElementById(noteId);
+  noteElement.classList.add('shake');
+  setTimeout(() => {
+      deleteNote(noteId);
+  }, 300);
+}
 
-  if (title && content) {
-      alert('Note saved successfully!');
-      // You can extend this to save the note to local storage or a database
-  } else {
-      alert('Please enter both a title and content.');
-  }
+function searchNotes() {
+  const query = document.getElementById('search-input').value.toLowerCase();
+  const notes = document.querySelectorAll('.flash-note');
+  
+  notes.forEach(note => {
+    const title = note.querySelector('h2').textContent.toLowerCase();
+    const content = note.querySelector('p').textContent.toLowerCase();
+    
+    if (title.includes(query) || content.includes(query)) {
+      note.style.display = 'block';
+    } else {
+      note.style.display = 'none';
+    }
+  });
 }
