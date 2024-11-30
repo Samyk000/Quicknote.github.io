@@ -151,6 +151,7 @@ h1 {
 .flash-note {
     background: #ffffff;
     border-radius: 15px;
+    border: 1px solid #e9e3f3;
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
     transition: transform 0.3s, box-shadow 0.3s;
@@ -171,9 +172,27 @@ h1 {
 /* Flash Note Header */
 .flash-note-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column; /* Stack title and category vertically */
     margin-bottom: 10px;
+}
+
+/* Note Category Selector Styling */
+.note-category-select {
+    margin-top: 5px; /* Space between title and category */
+    border: 1px solid #c4ade6;
+    border-radius: 5px;
+    padding: 5px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #ffffff;
+    color: #6136a7;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    width: fit-content; /* Ensure it fits its contents */
+}
+
+.note-category-select:hover {
+    border-color: #502b87;
+    background-color: #f0f0f0;
 }
 
 /* Flash Note Title */
@@ -183,8 +202,12 @@ h1 {
     margin: 0;
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
-    flex-grow: 1;
-    padding-right: 50px;
+    white-space: nowrap; /* Prevent title text from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .flash-note p {
@@ -200,22 +223,20 @@ h1 {
     display: flex;
     align-items: center;
     gap: 5px;
-    position: absolute;
-    top: 5px;
-    right: 10px;
+    margin-top: 5px; /* Add space between the title and buttons */
 }
 
 .edit-btn, .delete-btn {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.1em;
+    font-size: 1.2em;
     transition: transform 0.2s, color 0.2s;
-    color: #502b87;
+    color: #7c39df;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 5px;
+    padding: 3px;
     border-radius: 50%;
 }
 
@@ -252,7 +273,7 @@ h1 {
     background: #34495e;
     color: #ffffff;
     padding: 20px;
-    border: 1px solid #444;
+    border: 1px solid #305881;
 }
 
 .dark-mode .flash-note-header h2 {
@@ -336,4 +357,28 @@ tag {
     border-radius: 5px;
     padding: 5px;
     margin: 5px;
+}
+
+/* Category Selection and Filters Styling */
+.category-filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.category-btn {
+    font-family: 'Poppins', sans-serif;
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #c4ade6;
+    background-color: #ffffff;
+    color: #6136a7;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.category-btn:hover {
+    background-color: #6136a7;
+    color: #ffffff;
 }
