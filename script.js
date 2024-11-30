@@ -14,11 +14,11 @@ toggleDarkMode.addEventListener("click", () => {
 
     if (document.body.classList.contains("dark-mode")) {
         iconSpan.textContent = "";
-        toggleDarkMode.innerHTML = `<span class="icon">🔆</span> `;
+        toggleDarkMode.innerHTML = `<span class="icon">🔆</span>`;
         localStorage.setItem('darkMode', 'true');
     } else {
         iconSpan.textContent = "";
-        toggleDarkMode.innerHTML = `<span class="icon">🌘</span> `;
+        toggleDarkMode.innerHTML = `<span class="icon">🌘</span>`;
         localStorage.setItem('darkMode', 'false');
     }
 });
@@ -53,6 +53,7 @@ function displayFlashNotes(notes) {
                 <div class="flash-note-header">
                   <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" />
                   <select class="note-category-select" onchange="updateNoteCategory('${note.id}', this.value)">
+                      <option value="" disabled ${!note.category ? 'selected' : ''}>Category</option>
                       <option value="work" ${note.category === 'work' ? 'selected' : ''}>Work</option>
                       <option value="personal" ${note.category === 'personal' ? 'selected' : ''}>Personal</option>
                       <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
@@ -71,6 +72,7 @@ function displayFlashNotes(notes) {
             noteElement.innerHTML = `
                 <div class="flash-note-header">
                   <h2>${note.title}</h2>
+                  <span class="note-category">${note.category.charAt(0).toUpperCase() + note.category.slice(1)}</span>
                   <div class="icon-container">
                     <button onclick="editNote('${note.id}')" class="edit-btn"><i class="fas fa-edit"></i></button>
                     <button onclick="deleteNoteWithEffect('${note.id}')" class="delete-btn"><i class="fas fa-trash"></i></button>
@@ -88,13 +90,13 @@ function displayFlashNotes(notes) {
 // Display flash notes on page load
 displayFlashNotes(flashNotes);
 
-// Create new flash note with category selection
+// Create new flash note with default category as empty
 document.getElementById('create-note').addEventListener('click', () => {
     const newNote = {
         id: `note-${Date.now()}`,
         title: 'Title',
         content: '',
-        category: 'others', // Default category
+        category: '', // Default category as empty
         isEditing: true,
         updatedAt: new Date().toISOString()
     };
