@@ -15,13 +15,22 @@
             <button id="create-note" class="button">+</button>
         </div>
     </header>
-    
+
     <div id="controls">
         <div id="search-bar">
             <input type="text" id="search-input" placeholder="Search your notes" oninput="searchNotes()" />
         </div>
     </div>
-    
+
+    <!-- Category Filter Section -->
+    <div class="category-filters">
+        <button class="category-btn" data-category="all" onclick="filterByCategory('all')">All</button>
+        <button class="category-btn" data-category="work" onclick="filterByCategory('work')">Work</button>
+        <button class="category-btn" data-category="personal" onclick="filterByCategory('personal')">Personal</button>
+        <button class="category-btn" data-category="ideas" onclick="filterByCategory('ideas')">Ideas</button>
+        <button class="category-btn" data-category="others" onclick="filterByCategory('others')">Others</button>
+    </div>
+
     <main id="notes-container">
         <!-- Notes will be dynamically added here -->
     </main>
