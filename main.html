@@ -1,52 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quik Notes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quik Notes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <header>
-    <h1>Quik Notes</h1>
-    <div id="create-note-container">
-      <button id="create-note" class="button" onclick="createNote()">+</button>
-    </div>
-  </header>
-  <div id="controls">
-    <div id="search-bar">
-      <input type="text" id="search-input" placeholder="Search your notes" oninput="searchNotes()" />
-    </div>
-  </div>
-  <main id="notes-container">
-    <!-- Example notes for testing -->
-    <div class="flash-note">
-      <div class="flash-note-header">
-        <h2>Note 1</h2>
-        <div class="icon-container">
-          <button class="edit-btn"><i class="fas fa-edit"></i></button>
-          <button class="delete-btn"><i class="fas fa-trash"></i></button>
+    <header>
+        <h1>Quik Notes</h1>
+        <div id="create-note-container">
+            <button id="create-note" class="button">+</button>
         </div>
-      </div>
-      <p>This is the content of note 1.</p>
-    </div>
-    <div class="flash-note">
-      <div class="flash-note-header">
-        <h2>Note 2</h2>
-        <div class="icon-container">
-          <button class="edit-btn"><i class="fas fa-edit"></i></button>
-          <button class="delete-btn"><i class="fas fa-trash"></i></button>
+    </header>
+    
+    <div id="controls">
+        <div id="search-bar">
+            <input type="text" id="search-input" placeholder="Search your notes" oninput="searchNotes()" />
         </div>
-      </div>
-      <p>This is the content of note 2.</p>
     </div>
-  </main>
-  <button id="toggle-dark-mode" class="button toggle-dark-mode" onclick="toggleDarkMode()">
-    <span class="icon">🌙</span>
-  </button>
-  <script src="script.js"></script>
+    
+    <main id="notes-container">
+        <!-- Notes will be dynamically added here -->
+    </main>
+
+    <button id="toggle-dark-mode" class="button toggle-dark-mode">
+        <span class="icon">🌙</span>
+    </button>
+
+    <script src="script.js"></script>
 </body>
 </html>
