@@ -23,11 +23,11 @@ toggleDarkMode.addEventListener("click", () => {
     }
 });
 
-// Sample flash notes data
+// Sample flash notes data with categories
 let flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [
-    { id: 'note-1', title: 'Note 1', content: 'Content for flash note 1', isEditing: false, updatedAt: new Date().toISOString() },
-    { id: 'note-2', title: 'Note 2', content: 'Content for flash note 2', isEditing: false, updatedAt: new Date().toISOString() },
-    { id: 'note-3', title: 'Note 3', content: 'Content for flash note 3', isEditing: false, updatedAt: new Date().toISOString() }
+    { id: 'note-1', title: 'Note 1', content: 'Content for flash note 1', category: 'work', isEditing: false, updatedAt: new Date().toISOString() },
+    { id: 'note-2', title: 'Note 2', content: 'Content for flash note 2', category: 'personal', isEditing: false, updatedAt: new Date().toISOString() },
+    { id: 'note-3', title: 'Note 3', content: 'Content for flash note 3', category: 'ideas', isEditing: false, updatedAt: new Date().toISOString() }
 ];
 
 // Function to format date
@@ -45,12 +45,19 @@ function displayFlashNotes(notes) {
         const noteElement = document.createElement('div');
         noteElement.classList.add('flash-note');
         noteElement.id = note.id;
+        noteElement.setAttribute('data-category', note.category);
 
         if (note.isEditing) {
             // Display in edit mode
             noteElement.innerHTML = `
                 <div class="flash-note-header">
                   <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" />
+                  <select class="note-category-select" onchange="updateNoteCategory('${note.id}', this.value)">
+                      <option value="work" ${note.category === 'work' ? 'selected' : ''}>Work</option>
+                      <option value="personal" ${note.category === 'personal' ? 'selected' : ''}>Personal</option>
+                      <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
+                      <option value="others" ${note.category === 'others' ? 'selected' : ''}>Others</option>
+                  </select>
                   <div class="icon-container">
                     <button onclick="saveEdit('${note.id}')" class="edit-btn"><i class="fas fa-save"></i></button>
                     <button onclick="cancelEdit('${note.id}')" class="edit-btn"><i class="fas fa-times"></i></button>
@@ -81,12 +88,13 @@ function displayFlashNotes(notes) {
 // Display flash notes on page load
 displayFlashNotes(flashNotes);
 
-// Create new flash note
+// Create new flash note with category selection
 document.getElementById('create-note').addEventListener('click', () => {
     const newNote = {
         id: `note-${Date.now()}`,
         title: 'Title',
         content: '',
+        category: 'others', // Default category
         isEditing: true,
         updatedAt: new Date().toISOString()
     };
@@ -146,6 +154,15 @@ function updateNoteContent(noteId, newContent) {
     }
 }
 
+// Update note category in edit mode
+function updateNoteCategory(noteId, newCategory) {
+    const note = flashNotes.find(n => n.id === noteId);
+    if (note) {
+        note.category = newCategory; // Update category
+        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save changes
+    }
+}
+
 // Delete a flash note
 function deleteNote(noteId) {
     flashNotes = flashNotes.filter(note => note.id !== noteId);
@@ -172,6 +189,19 @@ function searchNotes() {
         const content = note.querySelector('p').textContent.toLowerCase();
         
         if (title.includes(query) || content.includes(query)) {
+            note.style.display = 'block';
+        } else {
+            note.style.display = 'none';
+        }
+    });
+}
+
+// Function to filter notes by category
+function filterByCategory(category) {
+    const notes = document.querySelectorAll('.flash-note');
+    notes.forEach(note => {
+        const noteCategory = note.getAttribute('data-category');
+        if (category === 'all' || noteCategory === category) {
             note.style.display = 'block';
         } else {
             note.style.display = 'none';
