@@ -29,7 +29,7 @@ body {
     align-items: center;
 }
 
-/* Header Styling */
+/* Header Configuration */
 header {
     display: flex;
     flex-direction: column;
@@ -46,7 +46,7 @@ h1 {
     text-align: center;
 }
 
-/* Create New Flash Note Button */
+/* Button for Creating New Flash Notes */
 #create-note-container {
     display: flex;
     justify-content: center;
@@ -84,7 +84,7 @@ h1 {
     transform: scale(1.1);
 }
 
-/* Controls Styling */
+/* Control Panel Styling */
 #controls {
     display: flex;
     justify-content: center;
@@ -94,7 +94,7 @@ h1 {
     box-sizing: border-box;
 }
 
-/* Search Bar Styling */
+/* Search Bar Setup */
 #search-bar {
     margin: 10px 120px;
     display: flex;
@@ -104,7 +104,7 @@ h1 {
     box-sizing: border-box;
 }
 
-/* Notes Container */
+/* Container for Notes */
 #notes-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -118,7 +118,7 @@ h1 {
     margin-top: 10px;
 }
 
-/* Search Input Styling */
+/* Styling for Search Input */
 #search-input {
     font-family: 'Poppins', sans-serif;
     width: 100%;
@@ -140,24 +140,22 @@ h1 {
     outline: 2px solid rgba(0, 0, 0, 0.5);
 }
 
-/* Individual Note Card */
+/* Individual Note Styling */
 .flash-note {
     background: #ffffff; /* Light mode background */
     border-radius: 15px;
-    border: 1px solid #e9e3f3;
+    border: 1px solid #9c81c8;
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
     transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-height: 250px;
-    max-height: 400px; /* Set a maximum height for the note */
-    overflow-y: auto; /* Allow scrolling if the content exceeds the max height */
-    position: relative;
+    height: 300px; /* Fixed height for consistent size */
+    overflow-y: auto; /* Enable scrolling */
 }
 
-/* Note Content Styling */
+/* Note Input Styling */
 .note-title-input, .note-content-input {
     width: auto;
     border: none;
@@ -179,51 +177,74 @@ h1 {
     font-size: 1em;
     line-height: 1.5;
     border: 1px solid #c4ade6;
-    height: 150px; /* You can adjust this height */
-    overflow-y: auto; /* Allow scrolling for the input area as well */
+    height: 150px; /* Adjustable height */
+    overflow-y: auto; /* Scrolling enabled */
     resize: none; /* Disable resizing */
 }
 
-/* Light Mode Scrollbar */
+.note-content-input::placeholder {
+    color: #bbb;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+}
+
+.tip-icon {
+    margin-right: 5px;
+}
+
+/* Consistent Scrollbar Styling */
 .flash-note::-webkit-scrollbar {
-    width: 10px;
-    background: #f6f8fc; /* Light mode scrollbar track */
+    width: 8px; /* Consistent width */
 }
 
 .flash-note::-webkit-scrollbar-thumb {
-    background-color: #6136a7; /* Light mode scrollbar color */
-    border-radius: 10px;
+    background-color: #6136a7; /* Thumb color */
+    border-radius: 12px; /* Curved corners */
 }
 
-.flash-note::-webkit-scrollbar-thumb:hover {
-    background-color: #502b87; /* Darker color on hover for light mode */
+.flash-note:hover::-webkit-scrollbar-thumb {
+    background-color: #502b87; /* Darker on hover */
 }
 
-/* Dark Mode Scrollbar */
-.dark-mode .flash-note::-webkit-scrollbar {
-    background: #1e1e1e; /* Deep Charcoal dark mode scrollbar track */
+/* Firefox Scrollbar Styling */
+.flash-note {
+    scrollbar-width: thin; /* Thin scrollbar */
+    scrollbar-color: #6136a7 transparent; /* Thumb and track colors */
 }
 
-.dark-mode .flash-note::-webkit-scrollbar-thumb {
-    background-color: #ffffff; /* White scrollbar color in dark mode */
-    border-radius: 10px;
+.flash-note:hover {
+    scrollbar-width: thin; /* Maintain consistent width */
 }
 
-.dark-mode .flash-note::-webkit-scrollbar-thumb:hover {
-    background-color: #d9d9d9; /* Lighter color on hover for better visibility */
+/* Ensure Scrollbar Visibility on Mobile */
+@media (max-width: 600px) {
+    .flash-note::-webkit-scrollbar {
+        width: 8px; /* Visible scrollbar on mobile */
+    }
+
+    .flash-note {
+        scrollbar-width: thin; /* Thin scrollbar on mobile */
+    }
 }
 
-/* For dark mode */
+/* Dark Mode Adjustments */
 .dark-mode .flash-note {
-    background: #1e1e1e; /* Deep Charcoal dark mode background */
+    background: #1e1e1e; /* Background for dark mode */
     color: #ffffff; /* Text color */
-    border: 1px solid #305881; /* Border color */
+    border: 1px solid #737e89; /* Border color */
+    scrollbar-color: #ffffff transparent; /* Thumb and track colors */
+}
+
+.dark-mode .flash-note:hover {
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff transparent;
 }
 
 /* Flash Note Header */
 .flash-note-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Vertical alignment */
     margin-bottom: 10px;
 }
 
@@ -239,6 +260,7 @@ h1 {
     cursor: pointer;
     transition: border-color 0.2s, background-color 0.2s;
     width: fit-content;
+    margin-bottom: 10px;
 }
 
 .note-category-select:hover {
@@ -256,9 +278,6 @@ h1 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .flash-note p {
@@ -330,7 +349,7 @@ h1 {
     text-align: left;
 }
 
-/* Dark Mode */
+/* Dark Mode Buttons */
 .dark-mode .edit-btn, .dark-mode .delete-btn {
     color: #ecf0f1;
 }
@@ -340,7 +359,7 @@ h1 {
 }
 
 .dark-mode {
-    background: linear-gradient(135deg, #1e1e1e, #2c3e50); /* Deep Charcoal for dark mode */
+    background: linear-gradient(135deg, #1e1e1e, #2c3e50); /* Background for dark mode */
     color: #ecf0f1;
 }
 
@@ -356,9 +375,28 @@ h1 {
     color: #ecf0f1;
 }
 
-/* Dark Mode Button */
+/* Toggle Dark Mode Button */
 #toggle-dark-mode {
     background: #000000;
+    color: #ffffff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5em;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-mode #toggle-dark-mode {
+    background: #ffffff;
     color: #ffffff;
     border: none;
     width: 40px;
@@ -384,6 +422,11 @@ h1 {
 @media (max-width: 768px) {
     #notes-container {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .flash-note-header {
+        flex-direction: column; /* Align items vertically in mobile */
+        align-items: flex-start;
     }
 }
 
@@ -456,4 +499,100 @@ h1 {
 .dark-mode .category-btn:hover {
     background-color: #6136a7;
     color: #ffffff;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.strike {
+    text-decoration: line-through;
+}
+
+/* Toast Notification Container */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 60px; /* Further adjusted to sit just beside the toggle button */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Toast Notification Styling */
+.toast {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 220px;
+    max-width: 300px;
+    padding: 12px 18px;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    background-color: #6136a7;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85em;
+    animation: fadeInOut 4s ease forwards;
+    transition: opacity 0.5s, transform 0.3s;
+    opacity: 0.5;
+    transform: translateY(-10px);
+}
+
+.toast span {
+    flex-grow: 1;
+    text-align: center;
+}
+
+/* Light Mode Toast */
+.toast.light-mode {
+    background-color: #ffffff;
+    color: #6136a7;
+    border: 1px solid #6136a7;
+}
+
+/* Dark Mode Toast */
+.dark-mode .toast {
+    background-color: #ffffff;
+    color: #6136a7;
+}
+
+/* Toast Animation */
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-50px); }
+    10% { opacity: 0.9; transform: translateY(0); }
+    90% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Pin Button Styling */
+.pin-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #f39c12; /* Default color */
+    transition: transform 0.2s, color 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+    border-radius: 50%;
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
+
+.pin-btn:hover {
+    transform: scale(1.1);
+    color: #d35400; /* Hover color */
+}
+
+/* Active Pin Button (when pinned) */
+.pinned {
+    color: #e74c3c !important; /* Red color when pinned */
 }
