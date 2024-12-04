@@ -27,14 +27,8 @@ if (localStorage.getItem('darkMode') === 'true') {
 // Add an event listener for toggling dark mode
 toggleDarkMode.addEventListener("click", () => {
     document.body.classList.toggle("dark-mode");
-
-    if (document.body.classList.contains("dark-mode")) {
-        iconSpan.textContent = "🔆"; // Sun icon for light mode
-        localStorage.setItem('darkMode', 'true');
-    } else {
-        iconSpan.textContent = "🌙"; // Moon icon for dark mode
-        localStorage.setItem('darkMode', 'false');
-    }
+    iconSpan.textContent = document.body.classList.contains("dark-mode") ? "🔆" : "🌙";
+    localStorage.setItem('darkMode', document.body.classList.contains("dark-mode"));
 });
 
 // Modal Logic
@@ -82,76 +76,75 @@ function formatText(text) {
 
 // Array of tips
 const tips = [
-  "💡 *Use asterisks* for bold.",
-  "💡 _Use underscores_ for italics.",
-  "💡 ~Use tildes~ for strikethrough.",
-  "💡 Toggle the moon icon for dark mode.",
-  "💡 Use category buttons to filter your notes.",
-  "💡 Use the search bar to quickly find notes."
+    "💡 *Use asterisks* for bold.",
+    "💡 _Use underscores_ for italics.",
+    "💡 ~Use tildes~ for strikethrough.",
+    "💡 Toggle the moon icon for dark mode.",
+    "💡 Use category buttons to filter your notes.",
+    "💡 Use the search bar to quickly find notes."
 ];
 
 // Function to get a random tip
 function getRandomTip() {
-  const randomIndex = Math.floor(Math.random() * tips.length);
-  return tips[randomIndex];
+    const randomIndex = Math.floor(Math.random() * tips.length);
+    return tips[randomIndex];
 }
 
 // Display all flash notes with formatting
 function displayFlashNotes(notes) {
-  const notesContainer = document.getElementById('notes-container');
-  notesContainer.innerHTML = ''; // Clear previous content
+    const notesContainer = document.getElementById('notes-container');
+    notesContainer.innerHTML = ''; // Clear previous content
 
-  // Ensure new notes are displayed at the top
-  notes.sort((a, b) => {
-      if (a.isEditing && a.isNew) return -1;
-      if (b.isEditing && b.isNew) return 1;
-      return b.isPinned - a.isPinned || new Date(b.updatedAt) - new Date(a.updatedAt);
-  });
+    // Ensure new notes are displayed at the top
+    notes.sort((a, b) => {
+        if (a.isEditing && a.isNew) return -1;
+        if (b.isEditing && b.isNew) return 1;
+        return b.isPinned - a.isPinned || new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
 
-  notes.forEach(note => {
-      const noteElement = document.createElement('div');
-      noteElement.classList.add('flash-note');
-      noteElement.id = note.id;
-      noteElement.setAttribute('data-category', note.category);
+    notes.forEach(note => {
+        const noteElement = document.createElement('div');
+        noteElement.classList.add('flash-note');
+        noteElement.id = note.id;
+        noteElement.setAttribute('data-category', note.category);
 
-      if (note.isEditing) {
-          // Display in edit mode
-          noteElement.innerHTML = `
-            <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" />
-            <select class="note-category-select" onchange="updateNoteCategory('${note.id}', this.value)">
-                <option value="" disabled ${!note.category ? 'selected' : ''}>Category</option>
-                <option value="work" ${note.category === 'work' ? 'selected' : ''}>Work</option>
-                <option value="personal" ${note.category === 'personal' ? 'selected' : ''}>Personal</option>
-                <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
-                <option value="others" ${note.category === 'others' ? 'selected' : ''}>Others</option>
-            </select>
-            <div class="icon-container">
-              <button onclick="saveEdit('${note.id}')" class="edit-btn"><i class="fas fa-save"></i></button>
-              <button onclick="cancelEdit('${note.id}')" class="edit-btn"><i class="fas fa-times"></i></button>
-            </div>
-            <textarea class="note-content-input" onfocus="removePlaceholder(this)" onblur="addPlaceholder(this)" placeholder="${getRandomTip()}">${note.content}</textarea>
-            <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
-          `;
-      } else {
-          // Display in normal mode with formatted content
-          const formattedContent = formatText(note.content);
-          noteElement.innerHTML = `
-              <div class="flash-note-header">
-                <h2>${note.title}</h2>
-                <span class="note-category">${note.category.charAt(0).toUpperCase() + note.category.slice(1)}</span>
+        if (note.isEditing) {
+            // Display in edit mode
+            noteElement.innerHTML = `
+                <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" required />
+                <select class="note-category-select" onchange="updateNoteCategory('${note.id}', this.value)">
+                    <option value="" disabled ${!note.category ? 'selected' : ''}>Category</option>
+                    <option value="work" ${note.category === 'work' ? 'selected' : ''}>Work</option>
+                    <option value="personal" ${note.category === 'personal' ? 'selected' : ''}>Personal</option>
+                    <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
+                    <option value="others" ${note.category === 'others' ? 'selected' : ''}>Others</option>
+                </select>
                 <div class="icon-container">
-                  <button onclick="pinNote('${note.id}')" class="pin-btn ${note.isPinned ? 'pinned' : ''}"><i class="fas fa-thumbtack"></i></button>
-                  <button onclick="editNote('${note.id}')" class="edit-btn"><i class="fas fa-edit"></i></button>
-                  <button onclick="deleteNoteWithEffect('${note.id}')" class="delete-btn"><i class="fas fa-trash"></i></button>
+                    <button onclick="saveEdit('${note.id}')" class="edit-btn"><i class="fas fa-save"></i></button>
+                    <button onclick="cancelEdit('${note.id}')" class="edit-btn"><i class="fas fa-times"></i></button>
                 </div>
-              </div>
-              <p style="white-space: pre-wrap;">${formattedContent}</p>
-              <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
-          `;
-      }
-
-      notesContainer.appendChild(noteElement);
-  });
+                <textarea class="note-content-input" onfocus="removePlaceholder(this)" onblur="addPlaceholder(this)" placeholder="${getRandomTip()}">${note.content}</textarea>
+                <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
+            `;
+        } else {
+            // Display in normal mode with formatted content
+            const formattedContent = formatText(note.content);
+            noteElement.innerHTML = `
+                <div class="flash-note-header">
+                    <h2>${note.title}</h2>
+                    <span class="note-category">${note.category.charAt(0).toUpperCase() + note.category.slice(1)}</span>
+                    <div class="icon-container">
+                        <button onclick="pinNote('${note.id}')" class="pin-btn ${note.isPinned ? 'pinned' : ''}"><i class="fas fa-thumbtack"></i></button>
+                        <button onclick="editNote('${note.id}')" class="edit-btn"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteNoteWithEffect('${note.id}')" class="delete-btn"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <p style="white-space: pre-wrap;">${formattedContent}</p>
+                <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
+            `;
+        }
+        notesContainer.appendChild(noteElement);
+    });
 }
 
 // Display flash notes on page load
@@ -243,7 +236,6 @@ function saveEdit(noteId) {
 
         localStorage.setItem('flashNotes', JSON.stringify(flashNotes));
         displayFlashNotes(flashNotes);
-
         showToast('✏️ Note Updated');
     }
 }
@@ -329,4 +321,66 @@ function addPlaceholder(element) {
     if (!element.value) {
         element.placeholder = getRandomTip();
     }
+}
+
+// Initialize Netlify Identity
+netlifyIdentity.on("login", user => {
+    // Close the modal and show a success message
+    loginModal.style.display = "none";
+    showToast(`Welcome, ${user.user_metadata.full_name || user.user_metadata.email}`);
+    netlifyIdentity.close();
+    // Fetch and display flash notes for the logged-in user
+    fetchUserNotes(user);
+});
+
+netlifyIdentity.on("logout", () => {
+    showToast("You have logged out.");
+    // Optionally clear notes or redirect
+});
+
+// Sign up function
+function signUp() {
+    const email = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    netlifyIdentity.signup({ email, password })
+        .then(user => {
+            showToast("Successfully signed up!");
+            netlifyIdentity.close();
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Sign up failed. Please try again.");
+        });
+}
+
+// Login function
+function login() {
+    const email = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    netlifyIdentity.login({ email, password })
+        .then(user => {
+            showToast("Successfully logged in!");
+            netlifyIdentity.close();
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Login failed. Please check your credentials.");
+        });
+}
+
+// Reset password function
+function resetPassword() {
+    const email = document.getElementById("username").value;
+
+    netlifyIdentity.recover(email)
+        .then(() => {
+            showToast("Password reset email sent!");
+            netlifyIdentity.close();
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Password reset failed. Please try again.");
+        });
 }
