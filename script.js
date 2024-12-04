@@ -32,12 +32,11 @@ toggleDarkMode.addEventListener("click", () => {
 });
 
 // Modal Logic
-const loginButton = document.getElementById("login-button");
 const loginModal = document.getElementById("login-modal");
 const closeModal = document.getElementById("close-modal");
 
 // Open the modal
-loginButton.addEventListener("click", () => {
+document.getElementById("open-login-modal").addEventListener("click", () => {
     loginModal.style.display = "block";
 });
 
@@ -56,35 +55,67 @@ window.addEventListener("click", (event) => {
 // Initialize Netlify Identity
 netlifyIdentity.init();
 
-// Event listeners for login, sign up, and reset password
+// Event listeners for login, signup, and reset password
 document.getElementById("login-button").addEventListener("click", (e) => {
     e.preventDefault();
-    netlifyIdentity.open('login');
+    login();
 });
 
 document.getElementById("sign-up-button").addEventListener("click", (e) => {
     e.preventDefault();
-    netlifyIdentity.open('signup');
+    signUp();
 });
 
 document.getElementById("reset-password-link").addEventListener("click", (e) => {
     e.preventDefault();
-    netlifyIdentity.open('recover');
+    resetPassword();
 });
 
 // Function to handle login
 function login() {
-    netlifyIdentity.open('login');
+    const email = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    netlifyIdentity.login({ email, password })
+        .then(user => {
+            showToast("Successfully logged in!");
+            loginModal.style.display = "none"; // Close the modal
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Login failed. Please check your credentials.");
+        });
 }
 
 // Function to handle signup
 function signUp() {
-    netlifyIdentity.open('signup');
+    const email = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    netlifyIdentity.signup({ email, password })
+        .then(user => {
+            showToast("Successfully signed up!");
+            loginModal.style.display = "none"; // Close the modal
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Sign up failed. Please try again.");
+        });
 }
 
 // Function to handle password recovery
 function resetPassword() {
-    netlifyIdentity.open('recover');
+    const email = document.getElementById("username").value;
+
+    netlifyIdentity.recover(email)
+        .then(() => {
+            showToast("Password reset email sent!");
+            loginModal.style.display = "none"; // Close the modal
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Password reset failed. Please try again.");
+        });
 }
 
 // Sample flash notes data with categories
@@ -371,50 +402,3 @@ netlifyIdentity.on("logout", () => {
     showToast("You have logged out.");
     // Optionally clear notes or redirect
 });
-
-// Sign up function
-function signUp() {
-    const email = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    netlifyIdentity.signup({ email, password })
-        .then(user => {
-            showToast("Successfully signed up!");
-            netlifyIdentity.close();
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("Sign up failed. Please try again.");
-        });
-}
-
-// Login function
-function login() {
-    const email = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    netlifyIdentity.login({ email, password })
-        .then(user => {
-            showToast("Successfully logged in!");
-            netlifyIdentity.close();
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("Login failed. Please check your credentials.");
-        });
-}
-
-// Reset password function
-function resetPassword() {
-    const email = document.getElementById("username").value;
-
-    netlifyIdentity.recover(email)
-        .then(() => {
-            showToast("Password reset email sent!");
-            netlifyIdentity.close();
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("Password reset failed. Please try again.");
-        });
-}
