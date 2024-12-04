@@ -37,6 +37,28 @@ toggleDarkMode.addEventListener("click", () => {
     }
 });
 
+// Modal Logic
+const loginButton = document.getElementById("login-button");
+const loginModal = document.getElementById("login-modal");
+const closeModal = document.getElementById("close-modal");
+
+// Open the modal
+loginButton.addEventListener("click", () => {
+    loginModal.style.display = "block";
+});
+
+// Close the modal
+closeModal.addEventListener("click", () => {
+    loginModal.style.display = "none";
+});
+
+// Close the modal when clicking outside of it
+window.addEventListener("click", (event) => {
+    if (event.target === loginModal) {
+        loginModal.style.display = "none";
+    }
+});
+
 // Sample flash notes data with categories
 let flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [
     { id: 'note-1', title: 'Note 1', content: 'Content for flash note 1', category: 'work', isEditing: false, updatedAt: new Date().toISOString(), isPinned: false },
@@ -54,8 +76,8 @@ function formatDate(dateString) {
 function formatText(text) {
     return text
         .replace(/\*(.*?)\*/g, '<span class="bold">$1</span>')      // Bold
-        .replace(/_(.*?)_/g, '<span class="italic">$1</span>')         // Italic
-        .replace(/~(.*?)~/g, '<span class="strike">$1</span>');        // Strikethrough
+        .replace(/_(.*?)_/g, '<span class="italic">$1</span>')      // Italic
+        .replace(/~(.*?)~/g, '<span class="strike">$1</span>');     // Strikethrough
 }
 
 // Array of tips
@@ -95,22 +117,20 @@ function displayFlashNotes(notes) {
       if (note.isEditing) {
           // Display in edit mode
           noteElement.innerHTML = `
-              <div class="flash-note-header">
-                <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" />
-                <select class="note-category-select" onchange="updateNoteCategory('${note.id}', this.value)">
-                    <option value="" disabled ${!note.category ? 'selected' : ''}>Category</option>
-                    <option value="work" ${note.category === 'work' ? 'selected' : ''}>Work</option>
-                    <option value="personal" ${note.category === 'personal' ? 'selected' : ''}>Personal</option>
-                    <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
-                    <option value="others" ${note.category === 'others' ? 'selected' : ''}>Others</option>
-                </select>
-                <div class="icon-container">
-                  <button onclick="saveEdit('${note.id}')" class="edit-btn"><i class="fas fa-save"></i></button>
-                  <button onclick="cancelEdit('${note.id}')" class="edit-btn"><i class="fas fa-times"></i></button>
-                </div>
-              </div>
-              <textarea class="note-content-input" onfocus="removePlaceholder(this)" onblur="addPlaceholder(this)" placeholder="${getRandomTip()}">${note.content}</textarea>
-              <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
+            <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" />
+            <select class="note-category-select" onchange="updateNoteCategory('${note.id}', this.value)">
+                <option value="" disabled ${!note.category ? 'selected' : ''}>Category</option>
+                <option value="work" ${note.category === 'work' ? 'selected' : ''}>Work</option>
+                <option value="personal" ${note.category === 'personal' ? 'selected' : ''}>Personal</option>
+                <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
+                <option value="others" ${note.category === 'others' ? 'selected' : ''}>Others</option>
+            </select>
+            <div class="icon-container">
+              <button onclick="saveEdit('${note.id}')" class="edit-btn"><i class="fas fa-save"></i></button>
+              <button onclick="cancelEdit('${note.id}')" class="edit-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <textarea class="note-content-input" onfocus="removePlaceholder(this)" onblur="addPlaceholder(this)" placeholder="${getRandomTip()}">${note.content}</textarea>
+            <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
           `;
       } else {
           // Display in normal mode with formatted content
@@ -143,14 +163,14 @@ document.getElementById('create-note').addEventListener('click', () => {
         id: `note-${Date.now()}`,
         title: 'Title',
         content: '',
-        category: '', // Default category as empty
+        category: '',
         isEditing: true,
-        isNew: true,  // Mark as new note
-        isPinned: false, // Default is not pinned
+        isNew: true,
+        isPinned: false,
         updatedAt: new Date().toISOString()
     };
 
-    flashNotes.unshift(newNote); // Add to the beginning of the array
+    flashNotes.unshift(newNote);
     displayFlashNotes(flashNotes);
 });
 
@@ -163,7 +183,6 @@ function showToast(message) {
     
     toastContainer.appendChild(toast);
 
-    // Remove the toast after 5 seconds
     setTimeout(() => {
         toast.remove();
     }, 5000);
@@ -190,11 +209,10 @@ function editNote(noteId) {
 function pinNote(noteId) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
-        note.isPinned = !note.isPinned; // Toggle pin status
+        note.isPinned = !note.isPinned;
         const noteElement = document.getElementById(noteId);
         const pinButton = noteElement.querySelector('.pin-btn');
 
-        // Toggle the pinned class for styling
         if (note.isPinned) {
             pinButton.classList.add('pinned');
         } else {
@@ -220,7 +238,7 @@ function saveEdit(noteId) {
         note.content = contentInput.value.trim();
         note.category = categorySelect.value;
         note.isEditing = false;
-        note.isNew = false; // Reset new note status after saving
+        note.isNew = false;
         note.updatedAt = new Date().toISOString();
 
         localStorage.setItem('flashNotes', JSON.stringify(flashNotes));
@@ -251,7 +269,7 @@ function updateNoteTitle(noteId, newTitle) {
 function updateNoteCategory(noteId, newCategory) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
-        note.category = newCategory; // Update category
+        note.category = newCategory;
     }
 }
 
@@ -309,6 +327,6 @@ function removePlaceholder(element) {
 
 function addPlaceholder(element) {
     if (!element.value) {
-        element.placeholder = getRandomTip(); // Use random tip as placeholder
+        element.placeholder = getRandomTip();
     }
 }
