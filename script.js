@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+// Initialize GoTrue client
+const auth = new GoTrue({
+  APIUrl: 'https://your-site.netlify.app/.netlify/identity', // Replace with your site URL
+  audience: '',
+  setCookie: false,
+});
+
 // Select the toggle button and its icon
 const toggleDarkMode = document.getElementById("toggle-dark-mode");
 const iconSpan = toggleDarkMode.querySelector(".icon");
@@ -52,25 +59,20 @@ window.addEventListener("click", (event) => {
     }
 });
 
-// Initialize Netlify Identity
-document.addEventListener("DOMContentLoaded", function() {
-    netlifyIdentity.init();
+// Event listeners for login, signup, and reset password
+document.getElementById("login-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    login();
+});
 
-    // Event listeners for login, signup, and reset password
-    document.getElementById("login-button").addEventListener("click", (e) => {
-        e.preventDefault();
-        login();
-    });
+document.getElementById("sign-up-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    signUp();
+});
 
-    document.getElementById("sign-up-button").addEventListener("click", (e) => {
-        e.preventDefault();
-        signUp();
-    });
-
-    document.getElementById("reset-password-link").addEventListener("click", (e) => {
-        e.preventDefault();
-        resetPassword();
-    });
+document.getElementById("reset-password-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    resetPassword();
 });
 
 // Function to handle login
@@ -79,8 +81,17 @@ function login() {
     const password = document.getElementById("password").value;
 
     if (email && password) {
-        netlifyIdentity.open('login');
-        // Use Netlify Identity's built-in UI for login
+        auth.login(email, password)
+            .then(response => {
+                console.log('User logged in', response);
+                showToast("Successfully logged in!");
+                loginModal.style.display = "none"; // Close the modal
+                // Update UI or redirect
+            })
+            .catch(error => {
+                console.error('Failed to login', error);
+                showToast("Login failed. Please check your credentials.");
+            });
     } else {
         showToast("Please enter both email and password.");
     }
@@ -92,8 +103,17 @@ function signUp() {
     const password = document.getElementById("password").value;
 
     if (email && password) {
-        netlifyIdentity.open('signup');
-        // Use Netlify Identity's built-in UI for signup
+        auth.signup(email, password)
+            .then(response => {
+                console.log('User signed up', response);
+                showToast("Successfully signed up!");
+                loginModal.style.display = "none"; // Close the modal
+                // Update UI or redirect
+            })
+            .catch(error => {
+                console.error('Failed to sign up', error);
+                showToast("Sign up failed. Please try again.");
+            });
     } else {
         showToast("Please enter both email and password.");
     }
@@ -104,8 +124,15 @@ function resetPassword() {
     const email = document.getElementById("username").value;
 
     if (email) {
-        netlifyIdentity.open('recover');
-        // Use Netlify Identity's built-in UI for password recovery
+        auth.requestPasswordRecovery(email)
+            .then(() => {
+                showToast("Password reset email sent!");
+                loginModal.style.display = "none"; // Close the modal
+            })
+            .catch(error => {
+                console.error('Failed to reset password', error);
+                showToast("Password reset failed. Please try again.");
+            });
     } else {
         showToast("Please enter your email address.");
     }
@@ -380,18 +407,3 @@ function addPlaceholder(element) {
         element.placeholder = getRandomTip();
     }
 }
-
-// Initialize Netlify Identity
-netlifyIdentity.on("login", user => {
-    // Close the modal and show a success message
-    loginModal.style.display = "none";
-    showToast(`Welcome, ${user.user_metadata.full_name || user.user_metadata.email}`);
-    netlifyIdentity.close();
-    // Fetch and display flash notes for the logged-in user
-    fetchUserNotes(user);
-});
-
-netlifyIdentity.on("logout", () => {
-    showToast("You have logged out.");
-    // Optionally clear notes or redirect
-});
