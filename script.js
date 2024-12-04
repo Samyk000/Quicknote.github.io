@@ -53,6 +53,40 @@ window.addEventListener("click", (event) => {
     }
 });
 
+// Initialize Netlify Identity
+netlifyIdentity.init();
+
+// Event listeners for login, sign up, and reset password
+document.getElementById("login-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    netlifyIdentity.open('login');
+});
+
+document.getElementById("sign-up-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    netlifyIdentity.open('signup');
+});
+
+document.getElementById("reset-password-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    netlifyIdentity.open('recover');
+});
+
+// Function to handle login
+function login() {
+    netlifyIdentity.open('login');
+}
+
+// Function to handle signup
+function signUp() {
+    netlifyIdentity.open('signup');
+}
+
+// Function to handle password recovery
+function resetPassword() {
+    netlifyIdentity.open('recover');
+}
+
 // Sample flash notes data with categories
 let flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [
     { id: 'note-1', title: 'Note 1', content: 'Content for flash note 1', category: 'work', isEditing: false, updatedAt: new Date().toISOString(), isPinned: false },
