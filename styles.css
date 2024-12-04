@@ -814,3 +814,22 @@ h1 {
     color: rgba(156, 163, 175, 1);
     margin-top: 10px;
 }
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+    transition: opacity 0.3s ease;
+}
+
+.netlify-identity-ui {
+    z-index: 2000 !important; /* Ensures the identity widget is on top */
+    position: relative;
+}
+
