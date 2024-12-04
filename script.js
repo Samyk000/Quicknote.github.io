@@ -53,22 +53,24 @@ window.addEventListener("click", (event) => {
 });
 
 // Initialize Netlify Identity
-netlifyIdentity.init();
+document.addEventListener("DOMContentLoaded", function() {
+    netlifyIdentity.init();
 
-// Event listeners for login, signup, and reset password
-document.getElementById("login-button").addEventListener("click", (e) => {
-    e.preventDefault();
-    login();
-});
+    // Event listeners for login, signup, and reset password
+    document.getElementById("login-button").addEventListener("click", (e) => {
+        e.preventDefault();
+        login();
+    });
 
-document.getElementById("sign-up-button").addEventListener("click", (e) => {
-    e.preventDefault();
-    signUp();
-});
+    document.getElementById("sign-up-button").addEventListener("click", (e) => {
+        e.preventDefault();
+        signUp();
+    });
 
-document.getElementById("reset-password-link").addEventListener("click", (e) => {
-    e.preventDefault();
-    resetPassword();
+    document.getElementById("reset-password-link").addEventListener("click", (e) => {
+        e.preventDefault();
+        resetPassword();
+    });
 });
 
 // Function to handle login
@@ -76,15 +78,12 @@ function login() {
     const email = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    netlifyIdentity.login({ email, password })
-        .then(user => {
-            showToast("Successfully logged in!");
-            loginModal.style.display = "none"; // Close the modal
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("Login failed. Please check your credentials.");
-        });
+    if (email && password) {
+        netlifyIdentity.open('login');
+        // Use Netlify Identity's built-in UI for login
+    } else {
+        showToast("Please enter both email and password.");
+    }
 }
 
 // Function to handle signup
@@ -92,30 +91,46 @@ function signUp() {
     const email = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    netlifyIdentity.signup({ email, password })
-        .then(user => {
-            showToast("Successfully signed up!");
-            loginModal.style.display = "none"; // Close the modal
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("Sign up failed. Please try again.");
-        });
+    if (email && password) {
+        netlifyIdentity.open('signup');
+        // Use Netlify Identity's built-in UI for signup
+    } else {
+        showToast("Please enter both email and password.");
+    }
 }
 
 // Function to handle password recovery
 function resetPassword() {
     const email = document.getElementById("username").value;
 
-    netlifyIdentity.recover(email)
-        .then(() => {
-            showToast("Password reset email sent!");
-            loginModal.style.display = "none"; // Close the modal
-        })
-        .catch(err => {
-            console.error(err);
-            showToast("Password reset failed. Please try again.");
-        });
+    if (email) {
+        netlifyIdentity.open('recover');
+        // Use Netlify Identity's built-in UI for password recovery
+    } else {
+        showToast("Please enter your email address.");
+    }
+}
+
+// Function to show toast notification
+function showToast(message) {
+    const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+    const toast = document.createElement('div');
+    toast.className = `toast ${document.body.classList.contains('dark-mode') ? '' : 'light-mode'}`;
+    toast.innerHTML = `<span>${message}</span>`;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+// Create toast container if it doesn't exist
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+    return container;
 }
 
 // Sample flash notes data with categories
@@ -231,28 +246,6 @@ document.getElementById('create-note').addEventListener('click', () => {
     flashNotes.unshift(newNote);
     displayFlashNotes(flashNotes);
 });
-
-// Function to show toast notification
-function showToast(message) {
-    const toastContainer = document.querySelector('.toast-container') || createToastContainer();
-    const toast = document.createElement('div');
-    toast.className = `toast ${document.body.classList.contains('dark-mode') ? '' : 'light-mode'}`;
-    toast.innerHTML = `<span>${message}</span>`;
-    
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 5000);
-}
-
-// Create toast container if it doesn't exist
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-    return container;
-}
 
 // Edit an existing flash note
 function editNote(noteId) {
