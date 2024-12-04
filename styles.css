@@ -27,6 +27,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background 0.3s ease-in-out;
 }
 
 /* Header Configuration */
@@ -37,6 +38,7 @@ header {
     padding: 20px;
     width: 100%;
     box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
 h1 {
@@ -44,6 +46,7 @@ h1 {
     color: #6136a7;
     margin: 20px 0;
     text-align: center;
+    transition: color 0.3s ease;
 }
 
 /* Button for Creating New Flash Notes */
@@ -116,6 +119,7 @@ h1 {
     padding: 20px;
     box-sizing: border-box;
     margin-top: 10px;
+    transition: all 0.3s ease;
 }
 
 /* Styling for Search Input */
@@ -129,6 +133,7 @@ h1 {
     border-radius: 10px;
     outline: none;
     text-align: center;
+    transition: outline 0.3s ease;
 }
 
 #search-input::placeholder {
@@ -142,7 +147,7 @@ h1 {
 
 /* Individual Note Styling */
 .flash-note {
-    background: #ffffff; /* Light mode background */
+    background: #ffffff;
     border-radius: 15px;
     border: 1px solid #9c81c8;
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
@@ -151,12 +156,31 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    height: 300px; /* Fixed height for consistent size */
-    overflow-y: auto; /* Enable scrolling */
+    height: 300px;
+    overflow-y: auto;
+}
+
+.flash-note:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Note Input Styling */
-.note-title-input, .note-content-input {
+.note-title-input {
+    width: auto;
+    max-width: 250px;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1em;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.note-content-input {
     width: auto;
     border: none;
     border-radius: 8px;
@@ -170,16 +194,16 @@ h1 {
 
 .note-title-input {
     height: 40px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .note-content-input {
     font-size: 1em;
     line-height: 1.5;
     border: 1px solid #c4ade6;
-    height: 150px; /* Adjustable height */
-    overflow-y: auto; /* Scrolling enabled */
-    resize: none; /* Disable resizing */
+    height: 150px;
+    overflow-y: auto;
+    resize: none;
 }
 
 .note-content-input::placeholder {
@@ -195,45 +219,45 @@ h1 {
 
 /* Consistent Scrollbar Styling */
 .flash-note::-webkit-scrollbar {
-    width: 8px; /* Consistent width */
+    width: 8px;
 }
 
 .flash-note::-webkit-scrollbar-thumb {
-    background-color: #6136a7; /* Thumb color */
-    border-radius: 12px; /* Curved corners */
+    background-color: #6136a7;
+    border-radius: 12px;
 }
 
 .flash-note:hover::-webkit-scrollbar-thumb {
-    background-color: #502b87; /* Darker on hover */
+    background-color: #502b87;
 }
 
 /* Firefox Scrollbar Styling */
 .flash-note {
-    scrollbar-width: thin; /* Thin scrollbar */
-    scrollbar-color: #6136a7 transparent; /* Thumb and track colors */
+    scrollbar-width: thin;
+    scrollbar-color: #6136a7 transparent;
 }
 
 .flash-note:hover {
-    scrollbar-width: thin; /* Maintain consistent width */
+    scrollbar-width: thin;
 }
 
 /* Ensure Scrollbar Visibility on Mobile */
 @media (max-width: 600px) {
     .flash-note::-webkit-scrollbar {
-        width: 8px; /* Visible scrollbar on mobile */
+        width: 8px;
     }
 
     .flash-note {
-        scrollbar-width: thin; /* Thin scrollbar on mobile */
+        scrollbar-width: thin;
     }
 }
 
 /* Dark Mode Adjustments */
 .dark-mode .flash-note {
-    background: #1e1e1e; /* Background for dark mode */
-    color: #ffffff; /* Text color */
-    border: 1px solid #737e89; /* Border color */
-    scrollbar-color: #ffffff transparent; /* Thumb and track colors */
+    background: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #737e89;
+    scrollbar-color: #ffffff transparent;
 }
 
 .dark-mode .flash-note:hover {
@@ -244,7 +268,7 @@ h1 {
 /* Flash Note Header */
 .flash-note-header {
     display: flex;
-    flex-direction: column; /* Vertical alignment */
+    flex-direction: column;
     margin-bottom: 10px;
 }
 
@@ -316,7 +340,16 @@ h1 {
 }
 
 .delete-btn {
-    color: #d9534f;
+    color: #c9302c;
+}
+
+.dark-mode .delete-btn {
+    color: #c9302c;
+}
+
+.dark-mode .delete-btn:hover {
+    transform: scale(1.1);
+    color: #c9302c;
 }
 
 .edit-btn:hover {
@@ -350,16 +383,24 @@ h1 {
 }
 
 /* Dark Mode Buttons */
-.dark-mode .edit-btn, .dark-mode .delete-btn {
+.dark-mode .edit-btn {
     color: #ecf0f1;
 }
 
-.dark-mode .edit-btn:hover, .dark-mode .delete-btn:hover {
+.dark-mode .delete-btn {
+    color: #d9534f;
+}
+
+.dark-mode .edit-btn:hover {
     color: #502b87;
 }
 
+.dark-mode .delete-btn:hover {
+    color: #c9302c;
+}
+
 .dark-mode {
-    background: linear-gradient(135deg, #1e1e1e, #2c3e50); /* Background for dark mode */
+    background: linear-gradient(135deg, #1e1e1e, #2c3e50);
     color: #ecf0f1;
 }
 
@@ -425,7 +466,7 @@ h1 {
     }
 
     .flash-note-header {
-        flex-direction: column; /* Align items vertically in mobile */
+        flex-direction: column;
         align-items: flex-start;
     }
 }
@@ -453,11 +494,6 @@ h1 {
     .header-container {
         flex-direction: column;
         align-items: center;
-    }
-
-    button {
-        width: 100%;
-        margin: 5px 0;
     }
 
     .modal-content {
@@ -516,8 +552,8 @@ h1 {
 /* Toast Notification Container */
 .toast-container {
     position: fixed;
-    top: 20px;
-    right: 60px; /* Further adjusted to sit just beside the toggle button */
+    top: 80px;
+    right: 10px;
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -529,8 +565,8 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 220px;
-    max-width: 300px;
+    min-width: 120px;
+    max-width: 250px;
     padding: 12px 18px;
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
@@ -551,8 +587,8 @@ h1 {
 
 /* Light Mode Toast */
 .toast.light-mode {
-    background-color: #ffffff;
-    color: #6136a7;
+    background-color: #6136a7;
+    color: #ffffff;
     border: 1px solid #6136a7;
 }
 
@@ -575,8 +611,8 @@ h1 {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.2em;
-    color: #f39c12; /* Default color */
+    font-size: 1.3em;
+    color: #f39c12;
     transition: transform 0.2s, color 0.2s;
     display: flex;
     justify-content: center;
@@ -589,10 +625,238 @@ h1 {
 
 .pin-btn:hover {
     transform: scale(1.1);
-    color: #d35400; /* Hover color */
+    color: #d35400;
 }
 
 /* Active Pin Button (when pinned) */
 .pinned {
-    color: #e74c3c !important; /* Red color when pinned */
+    color: #e74c3c !important;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: #641dd5;
+    margin: 13% auto;
+    padding:10px;
+    border: 1px solid #b492eb;
+    width: 90%;
+    max-width: 350px; /* Adjusted for better fit */
+    height: 500px;
+    border-radius: 40px;
+    position: relative;
+    transition: all 0.3s ease;
+    text-align: center; /* Center content */
+    overflow: hidden; /* Prevent overflow issues */
+}
+
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Login Button Style */
+.login-button {
+    position: fixed;
+    top: 12px;
+    right: 60px;
+    background-color: #6136a7;
+    color: #ffffff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #502b87;
+}
+
+/* Dark Mode Styles */
+.dark-mode .modal-content {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.dark-mode .close {
+    color: #fff;
+}
+
+.dark-mode .login-button {
+    background-color: #ffffff;
+    color: #6136a7;
+}
+
+.dark-mode .login-button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Login Form Styles */
+.form-container {
+    width: 90%;
+    border-radius: 0.75rem;
+    padding: 1.5rem; /* Reduced padding for compactness */
+    color: rgba(243, 244, 246, 1);
+    margin-top: -60px;
+}
+
+.title {
+    text-align: center;
+    font-size: 1.5rem;
+    line-height: 10rem;
+    font-weight: 700;
+    color: #ffffff;
+    }
+
+.form {
+    margin-top: -5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center form elements */
+}
+
+.input-group {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    width: 100%;
+    max-width: 300px; /* Ensure input fields fit within the modal */
+}
+
+.input-group label {
+    display: block;
+    color: rgb(255, 255, 255);
+    margin-bottom: 5px;
+    text-align: left;
+    margin-left: 30px;
+}
+
+.input-group input {
+    width: 70%;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(55, 65, 81, 1);
+    outline: 0;
+    background-color: rgb(255, 255, 255);
+    padding: 0.75rem 1rem;
+    color: rgba(243, 244, 246, 1);
+}
+
+.input-group input:focus {
+    border-color: rgba(167, 139, 250);
+}
+
+.forgot {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: rgba(156, 163, 175, 1);
+    margin: 8px 0 14px 0;
+    width: 100%;
+    max-width: 300px;
+}
+
+.forgot a{
+    color: rgba(243, 244, 246, 1);
+    text-decoration: none;
+    font-size: 14px;
+    margin-right:30px;
+}
+
+.signup a {
+    color: rgba(243, 244, 246, 1);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.forgot a:hover, .signup a:hover {
+    text-decoration: underline rgba(167, 139, 250, 1);
+}
+
+.sign {
+    display: block;
+    width: 50%;
+    max-width: 300px;
+    background-color: rgb(255, 255, 255);
+    padding: 0.75rem;
+    text-align: center;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.social-message {
+    display: flex;
+    align-items: center;
+    padding-top: 1rem;
+}
+
+.line {
+    height: 1px;
+    flex: 1 1 0%;
+    background-color: rgba(55, 65, 81, 1);
+}
+
+.social-message .message {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: rgba(156, 163, 175, 1);
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.social-icons .icon {
+    border-radius: 0.125rem;
+    padding: 0.75rem;
+    border: none;
+    background-color: transparent;
+    margin-left: 8px;
+}
+
+.social-icons .icon svg {
+    height: 1.25rem;
+    width: 1.25rem;
+    fill: #fff;
+}
+
+.signup {
+    text-align: center;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: rgba(156, 163, 175, 1);
+    margin-top: 10px;
 }
