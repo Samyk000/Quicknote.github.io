@@ -16,14 +16,17 @@
 
 // Initialize GoTrue client
 const auth = new GoTrue({
-    APIUrl: 'https://quiknotes.net/.netlify/identity', // Replace with your actual site URL
+    APIUrl: 'https://quiknotes.net/.netlify/identity', // Ensure this URL is correct
     audience: '',
-    setCookie: false,
+    setCookie: true, // Ensure session cookies are used
 });
 
-// Select the toggle button and its icon
+// DOM elements
 const toggleDarkMode = document.getElementById("toggle-dark-mode");
-const iconSpan = toggleDarkMode.querySelector(".icon");
+const loginModal = document.getElementById("login-modal");
+const closeModal = document.getElementById("close-modal");
+const profileContainer = document.getElementById("profile-container");
+const loginButton = document.getElementById("open-login-modal");
 
 // Initialize dark mode from localStorage
 if (localStorage.getItem('darkMode') === 'true') {
@@ -31,35 +34,36 @@ if (localStorage.getItem('darkMode') === 'true') {
     toggleDarkMode.innerHTML = '<span class="icon">🔆</span>';
 }
 
-// Add an event listener for toggling dark mode
-toggleDarkMode.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-    iconSpan.textContent = document.body.classList.contains("dark-mode") ? "🔆" : "🌙";
-    localStorage.setItem('darkMode', document.body.classList.contains("dark-mode"));
-});
-
-// Modal Logic
-const loginModal = document.getElementById("login-modal");
-const closeModal = document.getElementById("close-modal");
-
-// Open the modal
-document.getElementById("open-login-modal").addEventListener("click", () => {
-    loginModal.style.display = "block";
-});
-
-// Close the modal
-closeModal.addEventListener("click", () => {
-    loginModal.style.display = "none";
-});
-
-// Close the modal when clicking outside of it
-window.addEventListener("click", (event) => {
-    if (event.target === loginModal) {
-        loginModal.style.display = "none";
+// Check if user is already logged in on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const currentUser = auth.currentUser();
+    if (currentUser) {
+        updateUIOnLogin();
     }
 });
 
-// Event listeners for login, signup, and reset password
+// Event listeners
+toggleDarkMode.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    toggleDarkMode.innerHTML = document.body.classList.contains("dark-mode") ? '<span class="icon">🔆</span>' : '<span class="icon">🌙</span>';
+    localStorage.setItem('darkMode', document.body.classList.contains("dark-mode"));
+});
+
+loginButton.addEventListener("click", handleLoginLogout);
+closeModal.addEventListener("click", () => loginModal.style.display = "none");
+window.addEventListener("click", (event) => {
+    if (event.target === loginModal) loginModal.style.display = "none";
+});
+
+// Handle login/logout button click
+function handleLoginLogout() {
+    if (auth.currentUser()) {
+        logout();
+    } else {
+        loginModal.style.display = "block";
+    }
+}
+
 document.getElementById("login-button").addEventListener("click", (e) => {
     e.preventDefault();
     login();
@@ -75,7 +79,7 @@ document.getElementById("reset-password-link").addEventListener("click", (e) => 
     resetPassword();
 });
 
-// Function to handle login
+// Login function
 function login() {
     const email = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -85,8 +89,8 @@ function login() {
             .then(response => {
                 console.log('User logged in', response);
                 showToast("Successfully logged in!");
-                loginModal.style.display = "none"; // Close the modal
-                // Update UI or redirect
+                loginModal.style.display = "none";
+                updateUIOnLogin();
             })
             .catch(error => {
                 console.error('Failed to login', error);
@@ -97,7 +101,7 @@ function login() {
     }
 }
 
-// Function to handle signup
+// Signup function
 function signUp() {
     const email = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -107,7 +111,6 @@ function signUp() {
             .then(response => {
                 console.log('User signed up', response);
                 showToast("Successfully signed up! Please check your email to confirm.");
-                // Optionally close the modal or redirect
             })
             .catch(error => {
                 console.error('Failed to sign up', error);
@@ -118,7 +121,7 @@ function signUp() {
     }
 }
 
-// Function to handle password recovery
+// Password reset function
 function resetPassword() {
     const email = document.getElementById("username").value;
 
@@ -126,7 +129,6 @@ function resetPassword() {
         auth.requestPasswordRecovery(email)
             .then(() => {
                 showToast("Password reset email sent!");
-                // Optionally close the modal
             })
             .catch(error => {
                 console.error('Failed to reset password', error);
@@ -135,6 +137,28 @@ function resetPassword() {
     } else {
         showToast("Please enter your email address.");
     }
+}
+
+// Logout function
+function logout() {
+    auth.currentUser().logout()
+        .then(() => {
+            showToast("Logged out successfully!");
+            updateUIOnLogout();
+        })
+        .catch(error => console.error('Failed to logout', error));
+}
+
+// Update UI on login
+function updateUIOnLogin() {
+    profileContainer.style.display = "inline-block";
+    loginButton.textContent = "Logout";
+}
+
+// Update UI on logout
+function updateUIOnLogout() {
+    profileContainer.style.display = "none";
+    loginButton.textContent = "Login";
 }
 
 // Function to show toast notification
@@ -201,7 +225,7 @@ function displayFlashNotes(notes) {
     const notesContainer = document.getElementById('notes-container');
     notesContainer.innerHTML = ''; // Clear previous content
 
-    // Ensure new notes are displayed at the top
+    // Sort notes to ensure new notes are displayed at the top and saved notes after pinned ones
     notes.sort((a, b) => {
         if (a.isEditing && a.isNew) return -1;
         if (b.isEditing && b.isNew) return 1;
@@ -225,12 +249,12 @@ function displayFlashNotes(notes) {
                     <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
                     <option value="others" ${note.category === 'others' ? 'selected' : ''}>Others</option>
                 </select>
-                <div class="icon-container">
-                    <button onclick="saveEdit('${note.id}')" class="edit-btn"><i class="fas fa-save"></i></button>
-                    <button onclick="cancelEdit('${note.id}')" class="edit-btn"><i class="fas fa-times"></i></button>
+                <div class="icon-container" style="display: flex; justify-content: flex-end; margin-top: 1em;">
+                    <button onclick="saveEdit('${note.id}')" class="btn"><i class="fas fa-save"></i> </button>
+                    <button onclick="cancelEdit('${note.id}')" class="btn"><i class="fas fa-times"></i> </button>
                 </div>
                 <textarea class="note-content-input" onfocus="removePlaceholder(this)" onblur="addPlaceholder(this)" placeholder="${getRandomTip()}">${note.content}</textarea>
-                <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
+                <span class="last-updated">Last updated:<br>${formatDate(note.updatedAt)}</span>
             `;
         } else {
             // Display in normal mode with formatted content
@@ -246,7 +270,7 @@ function displayFlashNotes(notes) {
                     </div>
                 </div>
                 <p style="white-space: pre-wrap;">${formattedContent}</p>
-                <span class="last-updated">Last updated: ${formatDate(note.updatedAt)}</span>
+                <span class="last-updated">Last updated:<br>${formatDate(note.updatedAt)}</span>
             `;
         }
         notesContainer.appendChild(noteElement);
@@ -269,8 +293,8 @@ document.getElementById('create-note').addEventListener('click', () => {
         updatedAt: new Date().toISOString()
     };
 
-    flashNotes.unshift(newNote);
-    displayFlashNotes(flashNotes);
+    flashNotes.unshift(newNote); // Add new note to the top of the array
+    displayFlashNotes(flashNotes); // Refresh the display
 });
 
 // Edit an existing flash note
@@ -286,7 +310,7 @@ function editNote(noteId) {
 function pinNote(noteId) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
-        note.isPinned = !note.isPinned;
+        note.isPinned = !note.isPinned; // Toggle the pinned state
         const noteElement = document.getElementById(noteId);
         const pinButton = noteElement.querySelector('.pin-btn');
 
@@ -296,8 +320,8 @@ function pinNote(noteId) {
             pinButton.classList.remove('pinned');
         }
 
-        localStorage.setItem('flashNotes', JSON.stringify(flashNotes));
-        displayFlashNotes(flashNotes);
+        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes
+        displayFlashNotes(flashNotes); // Refresh the notes display
         showToast(note.isPinned ? '📌 Note Pinned' : '📌 Note Unpinned');
     }
 }
@@ -315,11 +339,21 @@ function saveEdit(noteId) {
         note.content = contentInput.value.trim();
         note.category = categorySelect.value;
         note.isEditing = false;
-        note.isNew = false;
+        note.isNew = false; // Set isNew to false after saving
         note.updatedAt = new Date().toISOString();
 
-        localStorage.setItem('flashNotes', JSON.stringify(flashNotes));
-        displayFlashNotes(flashNotes);
+        // Move the note after pinned notes if it is not pinned
+        if (!note.isPinned) {
+            flashNotes = flashNotes.filter(n => n.id !== noteId); // Remove from current position
+            const pinnedNotes = flashNotes.filter(n => n.isPinned); // Get all pinned notes
+            const unpinnedNotes = flashNotes.filter(n => !n.isPinned); // Get unpinned notes
+
+            // Combine pinned notes with the newly saved note and the rest
+            flashNotes = [...pinnedNotes, note, ...unpinnedNotes];
+        }
+
+        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes
+        displayFlashNotes(flashNotes); // Refresh the notes display
         showToast('✏️ Note Updated');
     }
 }
@@ -406,3 +440,6 @@ function addPlaceholder(element) {
         element.placeholder = getRandomTip();
     }
 }
+
+// Display flash notes on page load
+displayFlashNotes(flashNotes);
