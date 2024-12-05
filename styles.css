@@ -302,29 +302,29 @@ h1 {
 
 
 /*_________________________DARK MODE_____________________ */
-.dark-mode.note-category-select {
+.dark-mode .note-category-select {
     margin-top: -10px;
-    border: 1px solid #000000;
-    background-color: #000000;
+    border: 1px solid #1e1e1e; /* Black border */
+    background-color: #1e1e1e; /* Black background */
     position: absolute;
     border-radius: 5px;
     padding: 8px;
     font-family: 'Poppins', sans-serif;
     justify-content: center;
     align-items: center;
-    transition: transform 0.2s, color 0.2s;    ;
-    top:26px;
-    right:18px;
+    transition: transform 0.2s, color 0.2s, background-color 0.2s, border-color 0.2s; /* Include background and border in transition */
+    top: 26px;
+    right: 18px;
     display: flex;
-    color: #ffffff;
+    color: #ffffff; /* White text color for contrast */
     cursor: pointer;
     width: auto;
     margin-bottom: 1px;
 }
 
-.dark-mode.note-category-select:hover {
-    border-color: #000000;
-    background-color: #f0f0f0;
+.dark-mode .note-category-select:hover {
+    border-color: #1e1e1e; /* Keeps border black on hover */
+    background-color: #1e1e1e; /* Keeps background black on hover */
 }
 
 /* Flash Note Title */
