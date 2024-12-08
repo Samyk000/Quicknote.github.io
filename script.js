@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+
 // Import Firebase functions
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 // Firebase configuration
@@ -59,9 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("User is logged in:", user.uid);
             updateUIOnLogin();
             loadNotesFromFirestore(); // Load notes from Firestore if logged in
-            if (!user.emailVerified) {
-                verifyEmail(user); // Send email verification if not verified
-            }
+            // Remove email verification on login
         } else {
             console.log("No user is logged in.");
             updateUIOnLogout();
@@ -80,8 +79,16 @@ toggleDarkMode?.addEventListener("click", () => {
 loginButton?.addEventListener("click", handleLoginLogout);
 closeModal?.addEventListener("click", () => loginModal.style.display = "none");
 window.addEventListener("click", (event) => {
-    if (event.target === loginModal) loginModal.style.display = "none";
+    if (event.target === loginModal) {
+        loginModal.style.display = "none";
+        loginModal.setAttribute("aria-hidden", "true");
+    }
 });
+
+// Ensure aria-hidden is handled correctly
+if (loginModal) {
+    loginModal.setAttribute("aria-hidden", "true");
+}
 
 resetPasswordButton?.addEventListener("click", (e) => {
     e.preventDefault();
@@ -99,6 +106,7 @@ function handleLoginLogout() {
         logout();
     } else {
         loginModal.style.display = "block";
+        loginModal.setAttribute("aria-hidden", "false");
     }
 }
 
@@ -124,6 +132,7 @@ function login() {
                 console.log('User logged in', user.uid);
                 showToast("Successfully logged in!");
                 loginModal.style.display = "none";
+                loginModal.setAttribute("aria-hidden", "true");
                 updateUIOnLogin();
                 loadNotesFromFirestore(); // Load notes from Firestore on login
             })
@@ -263,7 +272,14 @@ async function saveNoteToFirestore(note) {
         const noteDoc = doc(notesRef, note.id);
 
         try {
-            await (note.id ? updateDoc(noteDoc, note) : addDoc(notesRef, note));
+            const docSnap = await getDoc(noteDoc);
+            if (docSnap.exists()) {
+                // Update the document if it exists
+                await updateDoc(noteDoc, note);
+            } else {
+                // Create the document if it doesn't exist
+                await setDoc(noteDoc, note);
+            }
             console.log('Note saved successfully!');
         } catch (error) {
             console.error('Error saving note:', error);
