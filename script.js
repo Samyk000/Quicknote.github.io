@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-// Initialize GoTrue client
-const auth = new GoTrue({
-    APIUrl: 'https://quiknotes.net/.netlify/identity', // Ensure this URL is correct
-    audience: '',
-    setCookie: true, // Ensure session cookies are used
-});
+// Import Firebase functions
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyBEveTkDs4XE9xmUUFNp5ipdjr-UxMLCa0",
+    authDomain: "quiknotes-cd28b.firebaseapp.com",
+    projectId: "quiknotes-cd28b",
+    storageBucket: "quiknotes-cd28b.appspot.com",
+    messagingSenderId: "80075452780",
+    appId: "1:80075452780:web:5cb27e1f5fffda0e66c349",
+    measurementId: "G-N8DN28CELL"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app); // Initialize Firestore
+const auth = getAuth(app); // Initialize Firebase Authentication
+
+// Initialize flashNotes
+let flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [];
 
 // DOM elements
 const toggleDarkMode = document.getElementById("toggle-dark-mode");
@@ -27,6 +44,7 @@ const loginModal = document.getElementById("login-modal");
 const closeModal = document.getElementById("close-modal");
 const profileContainer = document.getElementById("profile-container");
 const loginButton = document.getElementById("open-login-modal");
+const resetPasswordButton = document.getElementById("reset-password-button");
 
 // Initialize dark mode from localStorage
 if (localStorage.getItem('darkMode') === 'true') {
@@ -36,63 +54,80 @@ if (localStorage.getItem('darkMode') === 'true') {
 
 // Check if user is already logged in on page load
 document.addEventListener('DOMContentLoaded', () => {
-    const currentUser = auth.currentUser();
-    if (currentUser) {
-        updateUIOnLogin();
-    }
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("User is logged in:", user.uid);
+            updateUIOnLogin();
+            loadNotesFromFirestore(); // Load notes from Firestore if logged in
+            if (!user.emailVerified) {
+                verifyEmail(user); // Send email verification if not verified
+            }
+        } else {
+            console.log("No user is logged in.");
+            updateUIOnLogout();
+            loadNotesFromLocalStorage(); // Load notes from local storage if not logged in
+        }
+    });
 });
 
 // Event listeners
-toggleDarkMode.addEventListener("click", () => {
+toggleDarkMode?.addEventListener("click", () => {
     document.body.classList.toggle("dark-mode");
     toggleDarkMode.innerHTML = document.body.classList.contains("dark-mode") ? '<span class="icon">🔆</span>' : '<span class="icon">🌙</span>';
     localStorage.setItem('darkMode', document.body.classList.contains("dark-mode"));
 });
 
-loginButton.addEventListener("click", handleLoginLogout);
-closeModal.addEventListener("click", () => loginModal.style.display = "none");
+loginButton?.addEventListener("click", handleLoginLogout);
+closeModal?.addEventListener("click", () => loginModal.style.display = "none");
 window.addEventListener("click", (event) => {
     if (event.target === loginModal) loginModal.style.display = "none";
 });
 
+resetPasswordButton?.addEventListener("click", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("username")?.value;
+    if (email) {
+        sendResetEmail(email);
+    } else {
+        showToast("Please enter your email address.");
+    }
+});
+
 // Handle login/logout button click
 function handleLoginLogout() {
-    if (auth.currentUser()) {
+    if (auth.currentUser) {
         logout();
     } else {
         loginModal.style.display = "block";
     }
 }
 
-document.getElementById("login-button").addEventListener("click", (e) => {
+document.getElementById("login-button")?.addEventListener("click", (e) => {
     e.preventDefault();
     login();
 });
 
-document.getElementById("sign-up-button").addEventListener("click", (e) => {
+document.getElementById("sign-up-button")?.addEventListener("click", (e) => {
     e.preventDefault();
     signUp();
 });
 
-document.getElementById("reset-password-link").addEventListener("click", (e) => {
-    e.preventDefault();
-    resetPassword();
-});
-
 // Login function
 function login() {
-    const email = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("username")?.value;
+    const password = document.getElementById("password")?.value;
 
     if (email && password) {
-        auth.login(email, password)
-            .then(response => {
-                console.log('User logged in', response);
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                console.log('User logged in', user.uid);
                 showToast("Successfully logged in!");
                 loginModal.style.display = "none";
                 updateUIOnLogin();
+                loadNotesFromFirestore(); // Load notes from Firestore on login
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error('Failed to login', error);
                 showToast("Login failed. Please check your credentials.");
             });
@@ -103,16 +138,18 @@ function login() {
 
 // Signup function
 function signUp() {
-    const email = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("username")?.value;
+    const password = document.getElementById("password")?.value;
 
     if (email && password) {
-        auth.signup(email, password)
-            .then(response => {
-                console.log('User signed up', response);
-                showToast("Successfully signed up! Please check your email to confirm.");
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                console.log('User signed up', user.uid);
+                showToast("Successfully signed up!");
+                verifyEmail(user); // Send verification email after signup
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error('Failed to sign up', error);
                 showToast("Sign up failed. Please try again.");
             });
@@ -121,32 +158,45 @@ function signUp() {
     }
 }
 
-// Password reset function
-function resetPassword() {
-    const email = document.getElementById("username").value;
-
-    if (email) {
-        auth.requestPasswordRecovery(email)
-            .then(() => {
-                showToast("Password reset email sent!");
-            })
-            .catch(error => {
-                console.error('Failed to reset password', error);
-                showToast("Password reset failed. Please try again.");
-            });
-    } else {
-        showToast("Please enter your email address.");
-    }
-}
-
 // Logout function
 function logout() {
-    auth.currentUser().logout()
+    signOut(auth)
         .then(() => {
             showToast("Logged out successfully!");
             updateUIOnLogout();
+            loadNotesFromLocalStorage(); // Load notes from local storage on logout
         })
-        .catch(error => console.error('Failed to logout', error));
+        .catch((error) => console.error('Failed to logout', error));
+}
+
+// Function to send a password reset email
+function sendResetEmail(email) {
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            console.log("Password reset email sent!");
+            showToast("Password reset email sent!");
+        })
+        .catch((error) => {
+            console.error("Error sending password reset email:", error);
+            showToast("Error sending password reset. Please try again.");
+        });
+}
+
+// Function to send an email verification
+function verifyEmail(user) {
+    sendEmailVerification(user)
+        .then(() => {
+            console.log("Verification email sent.");
+            showToast("Verification email sent.");
+        })
+        .catch((error) => {
+            console.error("Error sending verification email:", error);
+            if (error.code === 'auth/too-many-requests') {
+                showToast("Too many requests. Please try again later.");
+            } else {
+                showToast("Error sending verification email. Please try again.");
+            }
+        });
 }
 
 // Update UI on login
@@ -183,12 +233,57 @@ function createToastContainer() {
     return container;
 }
 
-// Sample flash notes data with categories
-let flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [
-    { id: 'note-1', title: 'Note 1', content: 'Content for flash note 1', category: 'work', isEditing: false, updatedAt: new Date().toISOString(), isPinned: false },
-    { id: 'note-2', title: 'Note 2', content: 'Content for flash note 2', category: 'personal', isEditing: false, updatedAt: new Date().toISOString(), isPinned: false },
-    { id: 'note-3', title: 'Note 3', content: 'Content for flash note 3', category: 'ideas', isEditing: false, updatedAt: new Date().toISOString(), isPinned: false }
-];
+// Load notes from local storage
+function loadNotesFromLocalStorage() {
+    flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [];
+    displayFlashNotes(flashNotes);
+}
+
+// Load notes from Firestore
+async function loadNotesFromFirestore() {
+    const user = auth.currentUser;
+    if (user) {
+        const notesRef = collection(db, `users/${user.uid}/notes`);
+        const notesSnapshot = await getDocs(notesRef);
+        flashNotes = [];
+        notesSnapshot.forEach(doc => {
+            let note = doc.data();
+            note.id = doc.id; // Use Firestore document ID
+            flashNotes.push(note);
+        });
+        displayFlashNotes(flashNotes);
+    }
+}
+
+// Save a flash note
+async function saveNoteToFirestore(note) {
+    const user = auth.currentUser;
+    if (user) {
+        const notesRef = collection(db, `users/${user.uid}/notes`);
+        const noteDoc = doc(notesRef, note.id);
+
+        try {
+            await (note.id ? updateDoc(noteDoc, note) : addDoc(notesRef, note));
+            console.log('Note saved successfully!');
+        } catch (error) {
+            console.error('Error saving note:', error);
+        }
+    }
+}
+
+// Delete a flash note
+async function deleteNoteFromFirestore(noteId) {
+    const user = auth.currentUser;
+    if (user) {
+        const noteDoc = doc(db, `users/${user.uid}/notes/${noteId}`);
+        try {
+            await deleteDoc(noteDoc);
+            console.log('Note deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting note:', error);
+        }
+    }
+}
 
 // Function to format date
 function formatDate(dateString) {
@@ -277,11 +372,8 @@ function displayFlashNotes(notes) {
     });
 }
 
-// Display flash notes on page load
-displayFlashNotes(flashNotes);
-
 // Create new flash note with default category as empty
-document.getElementById('create-note').addEventListener('click', () => {
+document.getElementById('create-note')?.addEventListener('click', () => {
     const newNote = {
         id: `note-${Date.now()}`,
         title: 'Title',
@@ -295,19 +387,20 @@ document.getElementById('create-note').addEventListener('click', () => {
 
     flashNotes.unshift(newNote); // Add new note to the top of the array
     displayFlashNotes(flashNotes); // Refresh the display
+    saveNoteToFirestore(newNote); // Save the new note to Firestore
 });
 
 // Edit an existing flash note
-function editNote(noteId) {
+window.editNote = function(noteId) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
         note.isEditing = true;
         displayFlashNotes(flashNotes);
     }
-}
+};
 
 // Pin or unpin a note
-function pinNote(noteId) {
+window.pinNote = function(noteId) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
         note.isPinned = !note.isPinned; // Toggle the pinned state
@@ -320,14 +413,15 @@ function pinNote(noteId) {
             pinButton.classList.remove('pinned');
         }
 
-        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes
+        saveNoteToFirestore(note); // Save the updated note to Firestore
+        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes locally
         displayFlashNotes(flashNotes); // Refresh the notes display
         showToast(note.isPinned ? '📌 Note Pinned' : '📌 Note Unpinned');
     }
-}
+};
 
 // Save an edited or newly created flash note
-function saveEdit(noteId) {
+window.saveEdit = function(noteId) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
         const noteElement = document.getElementById(noteId);
@@ -352,57 +446,59 @@ function saveEdit(noteId) {
             flashNotes = [...pinnedNotes, note, ...unpinnedNotes];
         }
 
-        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes
+        saveNoteToFirestore(note); // Save the updated note to Firestore
+        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes locally
         displayFlashNotes(flashNotes); // Refresh the notes display
         showToast('✏️ Note Updated');
     }
-}
+};
 
 // Cancel editing a flash note
-function cancelEdit(noteId) {
+window.cancelEdit = function(noteId) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
         note.isEditing = false;
         displayFlashNotes(flashNotes);
     }
-}
+};
 
 // Update note title in edit mode
-function updateNoteTitle(noteId, newTitle) {
+window.updateNoteTitle = function(noteId, newTitle) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
         note.title = newTitle.trim();
     }
-}
+};
 
 // Update note category in edit mode
-function updateNoteCategory(noteId, newCategory) {
+window.updateNoteCategory = function(noteId, newCategory) {
     const note = flashNotes.find(n => n.id === noteId);
     if (note) {
         note.category = newCategory;
     }
-}
+};
 
 // Delete a flash note
-function deleteNote(noteId) {
+window.deleteNote = function(noteId) {
     flashNotes = flashNotes.filter(note => note.id !== noteId);
+    deleteNoteFromFirestore(noteId); // Delete from Firestore
     localStorage.setItem('flashNotes', JSON.stringify(flashNotes));
     displayFlashNotes(flashNotes);
-}
+};
 
 // Delete with shake effect
-function deleteNoteWithEffect(noteId) {
+window.deleteNoteWithEffect = function(noteId) {
     const noteElement = document.getElementById(noteId);
     noteElement.classList.add('shake');
     setTimeout(() => {
         deleteNote(noteId);
         showToast('❌ Note Deleted');
     }, 300);
-}
+};
 
 // Search notes
-function searchNotes() {
-    const query = document.getElementById('search-input').value.toLowerCase();
+window.searchNotes = function() {
+    const query = document.getElementById('search-input')?.value.toLowerCase();
     const notes = document.querySelectorAll('.flash-note');
     
     notes.forEach(note => {
@@ -415,10 +511,10 @@ function searchNotes() {
             note.style.display = 'none';
         }
     });
-}
+};
 
 // Function to filter notes by category
-function filterByCategory(category) {
+window.filterByCategory = function(category) {
     const notes = document.querySelectorAll('.flash-note');
     notes.forEach(note => {
         const noteCategory = note.getAttribute('data-category');
@@ -428,18 +524,18 @@ function filterByCategory(category) {
             note.style.display = 'none';
         }
     });
-}
+};
 
 // Placeholder management functions
-function removePlaceholder(element) {
+window.removePlaceholder = function(element) {
     element.placeholder = '';
-}
+};
 
-function addPlaceholder(element) {
+window.addPlaceholder = function(element) {
     if (!element.value) {
         element.placeholder = getRandomTip();
     }
-}
+};
 
 // Display flash notes on page load
 displayFlashNotes(flashNotes);
