@@ -183,7 +183,7 @@ h1 {
     border: none;
     border-radius: 8px;
     padding: 10px;
-    font-size: 1em;
+    font-size: 1.2em;
     align-items: center;
     font-family: 'Poppins', sans-serif;
     background-color: #ffffff;
@@ -198,16 +198,45 @@ h1 {
     padding: 10px;
     font-size: 0.90em;
     font-family: 'Poppins', sans-serif;
-    background-color: #f9f9f9;
+    background-color: #ffffff;
     resize: none;
     box-sizing: border-box;
     margin-bottom: -30px;
-    margin-top: -40px;
+    margin-top: -45px;
 }
 
 .note-title-input {
-    height: 40px;
+    height: 45px;
     margin-bottom: 12px;
+    border:1px solid #e2dee9;
+    border-radius: 8px; /* Ensure consistency with content input */
+    background-color: #ffffff !important; /* Dark background color */
+    color: #000000; /* White text color for contrast */
+}
+
+/* Ensure this block targets the correct elements */
+.dark-mode .note-content-input {
+    width: auto;
+    border: 1px solid #2b2a2a; /* White border */
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.90em;
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff; /* White text color for contrast */
+    background-color: #1e1e1e !important; /* Dark background color */
+    resize: none;
+    box-sizing: border-box;
+    margin-bottom: -30px;
+    margin-top: -45px;
+}
+
+.dark-mode .note-title-input {
+    height: 45px;
+    margin-bottom: 12px;
+    border: 1px solid #2b2a2a; /* White border */
+    border-radius: 8px; /* Ensure consistency with content input */
+    background-color: #1e1e1e !important; /* Dark background color */
+    color: #ffffff; /* White text color for contrast */
 }
 
 .note-content-input {
@@ -219,12 +248,14 @@ h1 {
     resize: none;
 }
 
+
 .note-content-input::placeholder {
     color: #bbb;
     font-style: italic;
     display: flex;
     align-items: center;
 }
+
 
 .tip-icon {
     margin-right: 5px;
@@ -361,12 +392,12 @@ h1 {
     height: 20px;
     border: none;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 1.3em;
     transition: transform 0.2s, color 0.2s;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 5px;
+    padding: 15px;
     border-radius: 50%;
     margin-top: 1px;
 }
@@ -390,6 +421,15 @@ h1 {
     color: #7c39df;
 }
 
+.dark-mode .edit-btn {
+    color: #b299d6;
+}
+
+.edit-btn:hover {
+    transform: scale(1.1);
+    color: #502b87;
+}
+
 .delete-btn {
     color: #c9302c;
 }
@@ -403,10 +443,7 @@ h1 {
     color: #c9302c;
 }
 
-.edit-btn:hover {
-    transform: scale(1.1);
-    color: #502b87;
-}
+
 
 .delete-btn:hover {
     transform: scale(1.1);
@@ -433,22 +470,6 @@ h1 {
     text-align: left;
 }
 
-/* Dark Mode Buttons */
-.dark-mode .edit-btn {
-    color: #ecf0f1;
-}
-
-.dark-mode .delete-btn {
-    color: #d9534f;
-}
-
-.dark-mode .edit-btn:hover {
-    color: #502b87;
-}
-
-.dark-mode .delete-btn:hover {
-    color: #c9302c;
-}
 
 .dark-mode {
     background: linear-gradient(135deg, #1e1e1e, #2c3e50);
@@ -912,18 +933,9 @@ h1 {
     color: black;
     background-color: white;
     top:120px;
-    margin-bottom:-110px;
+    margin-bottom:-105px;
 }
 
-.btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.btn:active {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-}
 
 .btn::after {
     content: "";
@@ -939,10 +951,7 @@ h1 {
     background-color: #fff;
 }
 
-.btn:hover::after {
-    transform: scaleX(1.4) scaleY(1.6);
-    opacity: 0;
-}
+
 
 .profile-icon {
     font-size: 45px;
