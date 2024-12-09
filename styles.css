@@ -968,3 +968,8 @@ h1 {
     color: #502b87;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+.profile-icon:hover {
+    color: #502b87;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
