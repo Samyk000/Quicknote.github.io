@@ -45,7 +45,7 @@ const loginModal = document.getElementById("login-modal");
 const closeModal = document.getElementById("close-modal");
 const profileContainer = document.getElementById("profile-container");
 const loginButton = document.getElementById("open-login-modal");
-const resetPasswordButton = document.getElementById("reset-password-button");
+const resetPasswordLink = document.getElementById("reset-password-link");
 
 // Initialize dark mode from localStorage
 if (localStorage.getItem('darkMode') === 'true') {
@@ -58,13 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("User is logged in:", user.uid);
+            if (!user.emailVerified) {
+                showToast("Please verify your email before logging in.");
+                signOut(auth);
+                return;
+            }
             updateUIOnLogin();
-            loadNotesFromFirestore(); // Load notes from Firestore if logged in
-            // Remove email verification on login
+            loadNotesFromFirestore();
         } else {
             console.log("No user is logged in.");
             updateUIOnLogout();
-            loadNotesFromLocalStorage(); // Load notes from local storage if not logged in
+            loadNotesFromLocalStorage();
         }
     });
 });
@@ -90,7 +94,8 @@ if (loginModal) {
     loginModal.setAttribute("aria-hidden", "true");
 }
 
-resetPasswordButton?.addEventListener("click", (e) => {
+// Forgot Password Link
+resetPasswordLink?.addEventListener("click", (e) => {
     e.preventDefault();
     const email = document.getElementById("username")?.value;
     if (email) {
@@ -129,12 +134,17 @@ function login() {
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
+                if (!user.emailVerified) {
+                    showToast("Please verify your email before logging in.");
+                    signOut(auth);
+                    return;
+                }
                 console.log('User logged in', user.uid);
                 showToast("Successfully logged in!");
                 loginModal.style.display = "none";
                 loginModal.setAttribute("aria-hidden", "true");
                 updateUIOnLogin();
-                loadNotesFromFirestore(); // Load notes from Firestore on login
+                loadNotesFromFirestore();
             })
             .catch((error) => {
                 console.error('Failed to login', error);
@@ -155,12 +165,21 @@ function signUp() {
             .then((userCredential) => {
                 const user = userCredential.user;
                 console.log('User signed up', user.uid);
-                showToast("Successfully signed up!");
-                verifyEmail(user); // Send verification email after signup
+                showToast("Successfully signed up! Please verify your email.");
+                verifyEmail(user);
+                signOut(auth); // Sign out immediately after signup
             })
             .catch((error) => {
                 console.error('Failed to sign up', error);
-                showToast("Sign up failed. Please try again.");
+                if (error.code === 'auth/email-already-in-use') {
+                    showToast("Email registered. Enter password or click forgot password.");
+                } else if (error.code === 'auth/invalid-email') {
+                    showToast("Invalid Email.");
+                } else if (error.code === 'auth/weak-password') {
+                    showToast("Use min 6 digit password.");
+                } else {
+                    showToast("Sign up failed. Please try again.");
+                }
             });
     } else {
         showToast("Please enter both email and password.");
@@ -173,7 +192,7 @@ function logout() {
         .then(() => {
             showToast("Logged out successfully!");
             updateUIOnLogout();
-            loadNotesFromLocalStorage(); // Load notes from local storage on logout
+            loadNotesFromLocalStorage();
         })
         .catch((error) => console.error('Failed to logout', error));
 }
