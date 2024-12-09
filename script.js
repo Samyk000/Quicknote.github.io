@@ -15,562 +15,98 @@
  */
 
 
-// Import Firebase functions
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quik Notes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Quik Notes</h1>
+        <div id="create-note-container">
+            <button id="create-note" class="button">+</button>
+        </div>
+        <div id="user-controls" style="position: absolute; top: 10px; right: 0; display: flex; align-items: center;">
+            <div id="profile-container" style="display: none; margin-right: 10px;">
+                <i class="material-icons profile-icon">account_circle</i>
+            </div>
+            <button id="open-login-modal" class="button login-button" aria-label="Login">Login</button>
+            <button id="toggle-dark-mode" class="button toggle-dark-mode" aria-label="Toggle dark mode">
+                <span class="icon">🌙</span>
+            </button>
+        </div>
+    </header>
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBEveTkDs4XE9xmUUFNp5ipdjr-UxMLCa0",
-    authDomain: "quiknotes-cd28b.firebaseapp.com",
-    projectId: "quiknotes-cd28b",
-    storageBucket: "quiknotes-cd28b.appspot.com",
-    messagingSenderId: "80075452780",
-    appId: "1:80075452780:web:5cb27e1f5fffda0e66c349",
-    measurementId: "G-N8DN28CELL"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); // Initialize Firestore
-const auth = getAuth(app); // Initialize Firebase Authentication
-
-// Initialize flashNotes
-let flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [];
-
-// DOM elements
-const toggleDarkMode = document.getElementById("toggle-dark-mode");
-const loginModal = document.getElementById("login-modal");
-const closeModal = document.getElementById("close-modal");
-const profileContainer = document.getElementById("profile-container");
-const loginButton = document.getElementById("open-login-modal");
-const resetPasswordLink = document.getElementById("reset-password-link");
-
-// Initialize dark mode from localStorage
-if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark-mode');
-    toggleDarkMode.innerHTML = '<span class="icon">🔆</span>';
-}
-
-// Check if user is already logged in on page load
-document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("User is logged in:", user.uid);
-            if (!user.emailVerified) {
-                showToast("Please verify your email before logging in.");
-                signOut(auth);
-                return;
-            }
-            updateUIOnLogin();
-            loadNotesFromFirestore();
-        } else {
-            console.log("No user is logged in.");
-            updateUIOnLogout();
-            loadNotesFromLocalStorage();
-        }
-    });
-});
-
-// Event listeners
-toggleDarkMode?.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-    toggleDarkMode.innerHTML = document.body.classList.contains("dark-mode") ? '<span class="icon">🔆</span>' : '<span class="icon">🌙</span>';
-    localStorage.setItem('darkMode', document.body.classList.contains("dark-mode"));
-});
-
-loginButton?.addEventListener("click", handleLoginLogout);
-closeModal?.addEventListener("click", () => loginModal.style.display = "none");
-window.addEventListener("click", (event) => {
-    if (event.target === loginModal) {
-        loginModal.style.display = "none";
-        loginModal.setAttribute("aria-hidden", "true");
-    }
-});
-
-// Ensure aria-hidden is handled correctly
-if (loginModal) {
-    loginModal.setAttribute("aria-hidden", "true");
-}
-
-// Forgot Password Link
-resetPasswordLink?.addEventListener("click", (e) => {
-    e.preventDefault();
-    const email = document.getElementById("username")?.value;
-    if (email) {
-        sendResetEmail(email);
-    } else {
-        showToast("Please enter your email address.");
-    }
-});
-
-// Handle login/logout button click
-function handleLoginLogout() {
-    if (auth.currentUser) {
-        logout();
-    } else {
-        loginModal.style.display = "block";
-        loginModal.setAttribute("aria-hidden", "false");
-    }
-}
-
-document.getElementById("login-button")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    login();
-});
-
-document.getElementById("sign-up-button")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    signUp();
-});
-
-// Login function
-function login() {
-    const email = document.getElementById("username")?.value;
-    const password = document.getElementById("password")?.value;
-
-    if (email && password) {
-        signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                if (!user.emailVerified) {
-                    showToast("Please verify your email before logging in.");
-                    signOut(auth);
-                    return;
-                }
-                console.log('User logged in', user.uid);
-                showToast("Successfully logged in!");
-                loginModal.style.display = "none";
-                loginModal.setAttribute("aria-hidden", "true");
-                updateUIOnLogin();
-                loadNotesFromFirestore();
-            })
-            .catch((error) => {
-                console.error('Failed to login', error);
-                showToast("Login failed. Please check your credentials.");
-            });
-    } else {
-        showToast("Please enter both email and password.");
-    }
-}
-
-// Signup function
-function signUp() {
-    const email = document.getElementById("username")?.value;
-    const password = document.getElementById("password")?.value;
-
-    if (email && password) {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                console.log('User signed up', user.uid);
-                showToast("Successfully signed up! Please verify your email.");
-                verifyEmail(user);
-                signOut(auth); // Sign out immediately after signup
-            })
-            .catch((error) => {
-                console.error('Failed to sign up', error);
-                if (error.code === 'auth/email-already-in-use') {
-                    showToast("Email registered. Enter password or click forgot password.");
-                } else if (error.code === 'auth/invalid-email') {
-                    showToast("Invalid Email.");
-                } else if (error.code === 'auth/weak-password') {
-                    showToast("Use min 6 digit password.");
-                } else {
-                    showToast("Sign up failed. Please try again.");
-                }
-            });
-    } else {
-        showToast("Please enter both email and password.");
-    }
-}
-
-// Logout function
-function logout() {
-    signOut(auth)
-        .then(() => {
-            showToast("Logged out successfully!");
-            updateUIOnLogout();
-            loadNotesFromLocalStorage();
-        })
-        .catch((error) => console.error('Failed to logout', error));
-}
-
-// Function to send a password reset email
-function sendResetEmail(email) {
-    sendPasswordResetEmail(auth, email)
-        .then(() => {
-            console.log("Password reset email sent!");
-            showToast("Password reset email sent!");
-        })
-        .catch((error) => {
-            console.error("Error sending password reset email:", error);
-            showToast("Error sending password reset. Please try again.");
-        });
-}
-
-// Function to send an email verification
-function verifyEmail(user) {
-    sendEmailVerification(user)
-        .then(() => {
-            console.log("Verification email sent.");
-            showToast("Verification email sent.");
-        })
-        .catch((error) => {
-            console.error("Error sending verification email:", error);
-            if (error.code === 'auth/too-many-requests') {
-                showToast("Too many requests. Please try again later.");
-            } else {
-                showToast("Error sending verification email. Please try again.");
-            }
-        });
-}
-
-// Update UI on login
-function updateUIOnLogin() {
-    profileContainer.style.display = "inline-block";
-    loginButton.textContent = "Logout";
-}
-
-// Update UI on logout
-function updateUIOnLogout() {
-    profileContainer.style.display = "none";
-    loginButton.textContent = "Login";
-}
-
-// Function to show toast notification
-function showToast(message) {
-    const toastContainer = document.querySelector('.toast-container') || createToastContainer();
-    const toast = document.createElement('div');
-    toast.className = `toast ${document.body.classList.contains('dark-mode') ? '' : 'light-mode'}`;
-    toast.innerHTML = `<span>${message}</span>`;
-    
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 5000);
-}
-
-// Create toast container if it doesn't exist
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-    return container;
-}
-
-// Load notes from local storage
-function loadNotesFromLocalStorage() {
-    flashNotes = JSON.parse(localStorage.getItem('flashNotes')) || [];
-    displayFlashNotes(flashNotes);
-}
-
-// Load notes from Firestore
-async function loadNotesFromFirestore() {
-    const user = auth.currentUser;
-    if (user) {
-        const notesRef = collection(db, `users/${user.uid}/notes`);
-        const notesSnapshot = await getDocs(notesRef);
-        flashNotes = [];
-        notesSnapshot.forEach(doc => {
-            let note = doc.data();
-            note.id = doc.id; // Use Firestore document ID
-            flashNotes.push(note);
-        });
-        displayFlashNotes(flashNotes);
-    }
-}
-
-// Save a flash note
-async function saveNoteToFirestore(note) {
-    const user = auth.currentUser;
-    if (user) {
-        const notesRef = collection(db, `users/${user.uid}/notes`);
-        const noteDoc = doc(notesRef, note.id);
-
-        try {
-            const docSnap = await getDoc(noteDoc);
-            if (docSnap.exists()) {
-                // Update the document if it exists
-                await updateDoc(noteDoc, note);
-            } else {
-                // Create the document if it doesn't exist
-                await setDoc(noteDoc, note);
-            }
-            console.log('Note saved successfully!');
-        } catch (error) {
-            console.error('Error saving note:', error);
-        }
-    }
-}
-
-// Delete a flash note
-async function deleteNoteFromFirestore(noteId) {
-    const user = auth.currentUser;
-    if (user) {
-        const noteDoc = doc(db, `users/${user.uid}/notes/${noteId}`);
-        try {
-            await deleteDoc(noteDoc);
-            console.log('Note deleted successfully!');
-        } catch (error) {
-            console.error('Error deleting note:', error);
-        }
-    }
-}
-
-// Function to format date
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-}
-
-// Function to apply formatting to note content
-function formatText(text) {
-    return text
-        .replace(/\*(.*?)\*/g, '<span class="bold">$1</span>')      // Bold
-        .replace(/_(.*?)_/g, '<span class="italic">$1</span>')      // Italic
-        .replace(/~(.*?)~/g, '<span class="strike">$1</span>');     // Strikethrough
-}
-
-// Array of tips
-const tips = [
-    "💡 *Use asterisks* for bold.",
-    "💡 _Use underscores_ for italics.",
-    "💡 ~Use tildes~ for strikethrough.",
-    "💡 Toggle the moon icon for dark mode.",
-    "💡 Use category buttons to filter your notes.",
-    "💡 Use the search bar to quickly find notes."
-];
-
-// Function to get a random tip
-function getRandomTip() {
-    const randomIndex = Math.floor(Math.random() * tips.length);
-    return tips[randomIndex];
-}
-
-// Display all flash notes with formatting
-function displayFlashNotes(notes) {
-    const notesContainer = document.getElementById('notes-container');
-    notesContainer.innerHTML = ''; // Clear previous content
-
-    // Sort notes to ensure new notes are displayed at the top and saved notes after pinned ones
-    notes.sort((a, b) => {
-        if (a.isEditing && a.isNew) return -1;
-        if (b.isEditing && b.isNew) return 1;
-        return b.isPinned - a.isPinned || new Date(b.updatedAt) - new Date(a.updatedAt);
-    });
-
-    notes.forEach(note => {
-        const noteElement = document.createElement('div');
-        noteElement.classList.add('flash-note');
-        noteElement.id = note.id;
-        noteElement.setAttribute('data-category', note.category);
-
-        if (note.isEditing) {
-            // Display in edit mode
-            noteElement.innerHTML = `
-                <input type="text" value="${note.title}" class="note-title-input" oninput="updateNoteTitle('${note.id}', this.value)" placeholder="Title" required />
-                <select class="note-category-select" onchange="updateNoteCategory('${note.id}', this.value)">
-                    <option value="" disabled ${!note.category ? 'selected' : ''}>Category</option>
-                    <option value="work" ${note.category === 'work' ? 'selected' : ''}>Work</option>
-                    <option value="personal" ${note.category === 'personal' ? 'selected' : ''}>Personal</option>
-                    <option value="ideas" ${note.category === 'ideas' ? 'selected' : ''}>Ideas</option>
-                    <option value="others" ${note.category === 'others' ? 'selected' : ''}>Others</option>
-                </select>
-                <div class="icon-container" style="display: flex; justify-content: flex-end; margin-top: 1em;">
-                    <button onclick="saveEdit('${note.id}')" class="btn"><i class="fas fa-save"></i> </button>
-                    <button onclick="cancelEdit('${note.id}')" class="btn"><i class="fas fa-times"></i> </button>
-                </div>
-                <textarea class="note-content-input" onfocus="removePlaceholder(this)" onblur="addPlaceholder(this)" placeholder="${getRandomTip()}">${note.content}</textarea>
-                <span class="last-updated">Last updated:<br>${formatDate(note.updatedAt)}</span>
-            `;
-        } else {
-            // Display in normal mode with formatted content
-            const formattedContent = formatText(note.content);
-            noteElement.innerHTML = `
-                <div class="flash-note-header">
-                    <h2>${note.title}</h2>
-                    <span class="note-category">${note.category.charAt(0).toUpperCase() + note.category.slice(1)}</span>
-                    <div class="icon-container">
-                        <button onclick="pinNote('${note.id}')" class="pin-btn ${note.isPinned ? 'pinned' : ''}"><i class="fas fa-thumbtack"></i></button>
-                        <button onclick="editNote('${note.id}')" class="edit-btn"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteNoteWithEffect('${note.id}')" class="delete-btn"><i class="fas fa-trash"></i></button>
+    <div id="login-modal" class="modal" role="dialog" aria-labelledby="login-title" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" id="close-modal" aria-label="Close modal">&times;</span>
+            <div class="form-container">
+                <p id="login-title" class="title">Login</p>
+                <form class="form" onsubmit="return false;">
+                    <div class="input-group">
+                        <label for="username">Email</label>
+                        <input type="text" name="username" id="username" placeholder="Email" required>
                     </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" placeholder="Password" required>
+                        <div class="forgot">
+                            <a rel="noopener noreferrer" href="#" id="reset-password-link">Forgot Password?</a>
+                        </div>
+                    </div>
+                    <button id="login-button" class="sign">Log In</button>
+                    <button id="sign-up-button" class="sign">Sign Up</button>
+                </form>
+                <div class="social-message">
+                    <div class="line"></div>
+                    <p class="message">Login with social accounts</p>
+                    <div class="line"></div>
                 </div>
-                <p style="white-space: pre-wrap;">${formattedContent}</p>
-                <span class="last-updated">Last updated:<br>${formatDate(note.updatedAt)}</span>
-            `;
-        }
-        notesContainer.appendChild(noteElement);
-    });
-}
+                <div class="social-icons">
+                    <button aria-label="Log in with Google" class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-5 h-5 fill-current">
+                            <path d="M16.318 13.714v5.484h9.078c-0.37 2.354-2.745 6.901-9.078 6.901-5.458 0-9.917-4.521-9.917-10.099s4.458-10.099 9.917-10.099c3.109 0 5.193 1.318 6.38 2.464l4.339-4.182c-2.786-2.599-6.396-4.182-10.719-4.182-8.844 0-16 7.151-16 16s7.156 16 16 16c9.234 0 15.365-6.49 15.365-15.635 0-1.052-0.115-1.854-0.255-2.651z"></path>
+                        </svg>
+                    </button>
+                    <button aria-label="Log in with Twitter" class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-5 h-5 fill-current">
+                            <path d="M31.937 6.093c-1.177 0.516-2.437 0.871-3.765 1.032 1.355-0.813 2.391-2.099 2.885-3.631-1.271 0.74-2.677 1.276-4.172 1.579-1.192-1.276-2.896-2.079-4.787-2.079-3.625 0-6.563 2.937-6.563 6.557 0 0.521 0.063 1.021 0.172 1.495-5.453-0.255-10.287-2.875-13.52-6.833-0.568 0.964-0.891 2.084-0.891 3.303 0 2.281 1.161 4.281 2.916 5.457-1.073-0.031-2.083-0.328-2.968-0.817v0.079c0 3.181 2.26 5.833 5.26 6.437-0.547 0.145-1.131 0.229-1.724 0.229-0.421 0-0.823-0.041-1.224-0.115 0.844 2.604 3.26 4.5 6.14 4.557-2.239 1.755-5.077 2.801-8.135 2.801-0.521 0-1.041-0.025-1.563-0.088 2.917 1.86 6.36 2.948 10.079 2.948 12.067 0 18.661-9.995 18.661-18.651 0-0.276 0-0.557-0.021-0.839 1.287-0.917 2.401-2.079 3.281-3.396z"></path>
+                        </svg>
+                    </button>
+                    <button aria-label="Log in with GitHub" class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-5 h-5 fill-current">
+                            <path d="M16 0.396c-8.839 0-16 7.167-16 16 0 7.073 4.584 13.068 10.937 15.183 0.803 0.151 1.093-0.344 1.093-0.772 0-0.38-0.009-1.385-0.015-2.719-4.453 0.964-5.391-2.151-5.391-2.151-0.729-1.844-1.781-2.339-1.781-2.339-1.448-0.989 0.115-0.968 0.115-0.968 1.604 0.109 2.448 1.645 2.448 1.645 1.427 2.448 3.744 1.74 4.661 1.328 0.14-1.031 0.557-1.74 1.011-2.135-3.552-0.401-7.287-1.776-7.287-7.907 0-1.751 0.62-3.177 1.645-4.297-0.177-0.401-0.719-2.031 0.141-4.235 0 0 1.339-0.427 4.4 1.641 1.281-0.355 2.641-0.532 4-0.541 1.36 0.009 2.719 0.187 4 0.541 3.043-2.068 4.381-1.641 4.381-1.641 0.859 2.204 0.317 3.833 0.161 4.235 1.015 1.12 1.635 2.547 1.635 4.297 0 6.145-3.74 7.5-7.296 7.891 0.556 0.479 1.077 1.464 1.077 2.959 0 2.14-0.020 3.864-0.020 4.385 0 0.416 0.28 0.916 1.104 0.755 6.4-2.093 10.979-8.093 10.979-15.156 0-8.833-7.161-16-16-16z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-// Create new flash note with default category as empty
-document.getElementById('create-note')?.addEventListener('click', () => {
-    const newNote = {
-        id: `note-${Date.now()}`,
-        title: 'Title',
-        content: '',
-        category: '',
-        isEditing: true,
-        isNew: true,
-        isPinned: false,
-        updatedAt: new Date().toISOString()
-    };
-
-    flashNotes.unshift(newNote); // Add new note to the top of the array
-    displayFlashNotes(flashNotes); // Refresh the display
-    saveNoteToFirestore(newNote); // Save the new note to Firestore
-});
-
-// Edit an existing flash note
-window.editNote = function(noteId) {
-    const note = flashNotes.find(n => n.id === noteId);
-    if (note) {
-        note.isEditing = true;
-        displayFlashNotes(flashNotes);
-    }
-};
-
-// Pin or unpin a note
-window.pinNote = function(noteId) {
-    const note = flashNotes.find(n => n.id === noteId);
-    if (note) {
-        note.isPinned = !note.isPinned; // Toggle the pinned state
-        const noteElement = document.getElementById(noteId);
-        const pinButton = noteElement.querySelector('.pin-btn');
-
-        if (note.isPinned) {
-            pinButton.classList.add('pinned');
-        } else {
-            pinButton.classList.remove('pinned');
-        }
-
-        saveNoteToFirestore(note); // Save the updated note to Firestore
-        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes locally
-        displayFlashNotes(flashNotes); // Refresh the notes display
-        showToast(note.isPinned ? '📌 Note Pinned' : '📌 Note Unpinned');
-    }
-};
-
-// Save an edited or newly created flash note
-window.saveEdit = function(noteId) {
-    const note = flashNotes.find(n => n.id === noteId);
-    if (note) {
-        const noteElement = document.getElementById(noteId);
-        const titleInput = noteElement.querySelector('.note-title-input');
-        const contentInput = noteElement.querySelector('.note-content-input');
-        const categorySelect = noteElement.querySelector('.note-category-select');
-
-        note.title = titleInput.value.trim();
-        note.content = contentInput.value.trim();
-        note.category = categorySelect.value;
-        note.isEditing = false;
-        note.isNew = false; // Set isNew to false after saving
-        note.updatedAt = new Date().toISOString();
-
-        // Move the note after pinned notes if it is not pinned
-        if (!note.isPinned) {
-            flashNotes = flashNotes.filter(n => n.id !== noteId); // Remove from current position
-            const pinnedNotes = flashNotes.filter(n => n.isPinned); // Get all pinned notes
-            const unpinnedNotes = flashNotes.filter(n => !n.isPinned); // Get unpinned notes
-
-            // Combine pinned notes with the newly saved note and the rest
-            flashNotes = [...pinnedNotes, note, ...unpinnedNotes];
-        }
-
-        saveNoteToFirestore(note); // Save the updated note to Firestore
-        localStorage.setItem('flashNotes', JSON.stringify(flashNotes)); // Save the updated notes locally
-        displayFlashNotes(flashNotes); // Refresh the notes display
-        showToast('✏️ Note Updated');
-    }
-};
-
-// Cancel editing a flash note
-window.cancelEdit = function(noteId) {
-    const note = flashNotes.find(n => n.id === noteId);
-    if (note) {
-        note.isEditing = false;
-        displayFlashNotes(flashNotes);
-    }
-};
-
-// Update note title in edit mode
-window.updateNoteTitle = function(noteId, newTitle) {
-    const note = flashNotes.find(n => n.id === noteId);
-    if (note) {
-        note.title = newTitle.trim();
-    }
-};
-
-// Update note category in edit mode
-window.updateNoteCategory = function(noteId, newCategory) {
-    const note = flashNotes.find(n => n.id === noteId);
-    if (note) {
-        note.category = newCategory;
-    }
-};
-
-// Delete a flash note
-window.deleteNote = function(noteId) {
-    flashNotes = flashNotes.filter(note => note.id !== noteId);
-    deleteNoteFromFirestore(noteId); // Delete from Firestore
-    localStorage.setItem('flashNotes', JSON.stringify(flashNotes));
-    displayFlashNotes(flashNotes);
-};
-
-// Delete with shake effect
-window.deleteNoteWithEffect = function(noteId) {
-    const noteElement = document.getElementById(noteId);
-    noteElement.classList.add('shake');
-    setTimeout(() => {
-        deleteNote(noteId);
-        showToast('❌ Note Deleted');
-    }, 300);
-};
-
-// Search notes
-window.searchNotes = function() {
-    const query = document.getElementById('search-input')?.value.toLowerCase();
-    const notes = document.querySelectorAll('.flash-note');
+    <div id="controls">
+        <div id="search-bar">
+            <input type="text" id="search-input" placeholder="Search your notes" oninput="searchNotes()" required />
+        </div>
+    </div>
     
-    notes.forEach(note => {
-        const title = note.querySelector('h2').textContent.toLowerCase();
-        const content = note.querySelector('p').textContent.toLowerCase();
-        
-        if (title.includes(query) || content.includes(query)) {
-            note.style.display = 'block';
-        } else {
-            note.style.display = 'none';
-        }
-    });
-};
+    <div class="category-filters">
+        <button class="category-btn" data-category="all" onclick="filterByCategory('all')">All</button>
+        <button class="category-btn" data-category="work" onclick="filterByCategory('work')">Work</button>
+        <button class="category-btn" data-category="personal" onclick="filterByCategory('personal')">Personal</button>
+        <button class="category-btn" data-category="ideas" onclick="filterByCategory('ideas')">Ideas</button>
+        <button class="category-btn" data-category="others" onclick="filterByCategory('others')">Others</button>
+    </div>
+    
+    <main id="notes-container">
+        <!-- Notes will be dynamically added here -->
+    </main>
 
-// Function to filter notes by category
-window.filterByCategory = function(category) {
-    const notes = document.querySelectorAll('.flash-note');
-    notes.forEach(note => {
-        const noteCategory = note.getAttribute('data-category');
-        if (category === 'all' || noteCategory === category) {
-            note.style.display = 'block';
-        } else {
-            note.style.display = 'none';
-        }
-    });
-};
-
-// Placeholder management functions
-window.removePlaceholder = function(element) {
-    element.placeholder = '';
-};
-
-window.addPlaceholder = function(element) {
-    if (!element.value) {
-        element.placeholder = getRandomTip();
-    }
-};
-
-// Display flash notes on page load
-displayFlashNotes(flashNotes);
+    <script type="module" src="script.js"></script>
+</body>
+</html>
