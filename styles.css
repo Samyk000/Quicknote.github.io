@@ -21,12 +21,13 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    transition: all 0.3s ease-in-out; /* Global transition for smooth animations */
 }
 
 /* General Styling */
 body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f6f8fc, #ffffff);
+    background: #ffffff;
     color: #2c3e50;
     margin: 0;
     padding: 0;
@@ -49,12 +50,43 @@ header {
 }
 
 h1 {
-    font-size: 3em;
-    color: #6136a7;
-    margin-top: 50px;
+    font-size: 3.9rem;
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     text-align: center;
-    transition: color 0.3s ease;
+    margin-top: 80px;
+    background: linear-gradient(to right, #6136a7, #58388a, #8d71b9, #664d8f, #4d268c, #7035ce);
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient 2.5s linear infinite;
 }
+
+@keyframes gradient {
+    to {
+        background-position: 200% center;
+    }
+}
+
+.dark-mode h1 {
+    font-size: 3.9rem;
+    font-family: inherit;
+    text-align: center;
+    margin-top: 80px;
+    background: linear-gradient(to right, #dbdada, #555454, rgb(82, 81, 81), rgb(128, 129, 130), rgb(191, 190, 190));
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient 3s linear infinite;
+}
+
+@keyframes gradient {
+    to {
+        background-position: 200% center;
+    }
+}
+
 
 /* Button for Creating New Flash Notes */
 #create-note-container {
@@ -68,7 +100,8 @@ h1 {
     height: 50px;
     background-color: #6136a7;
     color: #ffffff;
-    margin-top: 30px;
+    margin-top: 60px;
+    margin-bottom: -30px;
     border: none;
     border-radius: 50%;
     font-size: 2em;
@@ -87,7 +120,7 @@ h1 {
 
 .dark-mode #create-note {
     background-color: #ffffff;
-    color: #6136a7;
+    color: #1e1e1e;
 }
 
 .dark-mode #create-note:hover {
@@ -216,25 +249,13 @@ h1 {
 
 /* Ensure this block targets the correct elements */
 .dark-mode .note-content-input {
-    width: auto;
     border: 1px solid #2b2a2a; /* White border */
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 0.90em;
-    font-family: 'Poppins', sans-serif;
     color: #ffffff; /* White text color for contrast */
     background-color: #1e1e1e !important; /* Dark background color */
-    resize: none;
-    box-sizing: border-box;
-    margin-bottom: -30px;
-    margin-top: -45px;
 }
 
 .dark-mode .note-title-input {
-    height: 45px;
-    margin-bottom: 12px;
     border: 1px solid #2b2a2a; /* White border */
-    border-radius: 8px; /* Ensure consistency with content input */
     background-color: #1e1e1e !important; /* Dark background color */
     color: #ffffff; /* White text color for contrast */
 }
@@ -334,23 +355,9 @@ h1 {
 
 /*_________________________DARK MODE_____________________ */
 .dark-mode .note-category-select {
-    margin-top: -10px;
     border: 1px solid #1e1e1e; /* Black border */
     background-color: #1e1e1e; /* Black background */
-    position: absolute;
-    border-radius: 5px;
-    padding: 8px;
-    font-family: 'Poppins', sans-serif;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s, color 0.2s, background-color 0.2s, border-color 0.2s; /* Include background and border in transition */
-    top: 26px;
-    right: 18px;
-    display: flex;
     color: #ffffff; /* White text color for contrast */
-    cursor: pointer;
-    width: auto;
-    margin-bottom: 1px;
 }
 
 .dark-mode .note-category-select:hover {
@@ -411,11 +418,6 @@ h1 {
     width: calc(100% - 20px); /* Ensure it fits well within the card */
 }
 
-/* Add smooth animations */
-* {
-    transition: all 0.3s ease-in-out; /* Global transition for smooth animations */
-}
-
 /* Separate styles for each button */
 .edit-btn {
     color: #7c39df;
@@ -462,17 +464,12 @@ h1 {
 
 /* Dark Mode Last Updated */
 .dark-mode .last-updated {
-    font-size: 0.60em;
     color: #6b6a6d;
-    font-style: italic;
-    margin-top: auto;
-    padding-left: 1px;
-    text-align: left;
 }
 
 
 .dark-mode {
-    background: linear-gradient(135deg, #1e1e1e, #2c3e50);
+    background: linear-gradient(135deg, #28262b, #2f2e32);
     color: #ecf0f1;
 }
 
@@ -484,22 +481,19 @@ h1 {
     color: #bdc3c7;
 }
 
-.dark-mode h1 {
-    color: #ecf0f1;
-}
 
 /* Toggle Dark Mode Button */
 #toggle-dark-mode {
     background: #000000;
     color: #ffffff;
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     cursor: pointer;
     transition: background 0.3s, color 0.3s;
     position: absolute;
-    top: 10px;
+    top: 1px;
     right: 10px;
     font-size: 1.5em;
     z-index: 200; /* Ensure it stays on top */
@@ -572,9 +566,9 @@ h1 {
 
 /* Dark Mode Category Button */
 .dark-mode .category-btn {
-    border: 1px solid #c4ade6;
-    background-color: #ffffff;
-    color: #000000;
+    border: 1px solid #1e1e1e;
+    background-color: #1e1e1e;
+    color: #ffffff;
 }
 
 .dark-mode .category-btn:hover {
@@ -688,7 +682,7 @@ h1 {
     border: 1px solid #b492eb;
     width: 90%;
     max-width: 350px; /* Adjusted for better fit */
-    height: 500px;
+    height: 425;
     border-radius: 40px;
     position: relative;
     transition: all 0.3s ease;
@@ -716,12 +710,12 @@ h1 {
 /* Login Button Style */
 .login-button {
     position: absolute;
-    top: 12px;
-    right: 60px;
+    top: 1px;
+    right: 54px;
     background-color: #6136a7;
     color: #ffffff;
     border: none;
-    padding: 10px 15px;
+    padding: 10px 10px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -729,7 +723,17 @@ h1 {
 }
 
 .login-button:hover {
-    background-color: #502b87;
+    background-color: #2f1358;
+}
+
+.dark-mode .login-button {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+.dark-mode .login-button:hover {
+    background-color: #000000;
+    color: #ffffff;
 }
 
 /* Dark Mode Styles */
@@ -739,18 +743,7 @@ h1 {
     border: 1px solid #555;
 }
 
-.dark-mode .close {
-    color: #fff;
-}
 
-.dark-mode .login-button {
-    background-color: #ffffff;
-    color: #6136a7;
-}
-
-.dark-mode .login-button:hover {
-    background-color: #f0f0f0;
-}
 
 /* Login Form Styles */
 .form-container {
@@ -898,20 +891,6 @@ h1 {
     fill: #fff;
 }
 
-
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-    transition: opacity 0.3s ease;
-}
-
 .netlify-identity-ui {
     z-index: 2000 !important; /* Ensures the identity widget is on top */
     position: relative;
@@ -954,22 +933,22 @@ h1 {
 
 
 .profile-icon {
-    font-size: 45px;
+    font-size: 40px;
     color: #6136a7;
     cursor: pointer;
-    margin-right: 125px;
-    margin-top: 10px;
+    margin-right: 110px;
     transition: color 0.3s, box-shadow 0.3s;
     display: inline-block;
     vertical-align: middle;
 }
 
 .profile-icon:hover {
-    color: #502b87;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #220e3e;
 }
 
-.profile-icon:hover {
-    color: #502b87;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.dark-mode .profile-icon {
+    color: #ffffff ;}
+
+.dark-mode .profile-icon:hover {
+    color: #1e1e1e;
 }
